@@ -15,7 +15,9 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "ejs": "^5.0.1",
     "express": "^5.2.1",
+    "express-ejs-layouts": "^2.5.1",
     "mysql": "^2.18.1"
   }
 }
