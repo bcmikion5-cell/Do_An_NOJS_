@@ -1,86 +1,154 @@
 const express = require('express');
 const path = require('path');
 const expressLayouts = require('express-ejs-layouts');
+const mysql = require('mysql');
 
 const app = express();
 
-// --- CẤU HÌNH HỆ THỐNG ---
+// ================= CẤU HÌNH =================
 
-// 1. Cấu hình thư mục tĩnh (CSS, IMG, JS, LIB)
-// Chỉ cần 1 dòng duy nhất là đủ
+// static folder
 app.use(express.static(path.join(__dirname, 'public')));
 
-// 2. Thiết lập View Engine
+// view engine
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
-// 3. Cấu hình Layout
+// layout
 app.use(expressLayouts);
-app.set('layout', 'layouts/main'); // File này nằm ở views/layouts/main.ejs
+app.set('layout', 'layouts/main');
 
+// body parser (CHỈ CẦN 1 cái)
+app.use(express.urlencoded({ extended: true }));
 
-// --- ĐỊNH NGHĨA CÁC ROUTE (PHẦN BẠN CẦN THÊM) ---
+// ================= DATABASE =================
+const db = mysql.createConnection({
+    host: "localhost",
+    user: "root",
+    password: "",
+    database: "csdl"
+});
 
-// Route cho trang chủ
+// connect DB
+db.connect((err) => {
+    if (err) {
+        console.error("❌ Kết nối DB lỗi:", err);
+    } else {
+        console.log("✅ Kết nối MySQL thành công!");
+    }
+});
+
+// ================= ROUTES =================
+
+// Trang chủ
 app.get('/', (req, res) => {
     res.render('pages/index', { title: 'Trang chủ - BizNews' });
 });
 
-// Route cho trang danh mục
+// Danh mục
 app.get('/category', (req, res) => {
-    // Truyền thêm biến categoryName để tránh lỗi "not defined" mà bạn gặp lúc trước
-    res.render('pages/category', { 
+    res.render('pages/category', {
         title: 'Danh mục - BizNews',
-        categoryName: 'Kinh doanh' 
+        categoryName: 'Kinh doanh'
     });
 });
 
-// Route cho trang chi tiết tin tức
+// Chi tiết
 app.get('/single', (req, res) => {
     // Đảm bảo file tồn tại tại: views/pages/single.ejs
-    res.render('pages/single', { 
-        title: 'Chi tiết tin tức - BizNews' 
+    res.render('pages/single', {
+        title: 'Chi tiết tin tức - BizNews'
     });
 });
 
-// Route cho trang liên hệ
+// Liên hệ
 app.get('/contact', (req, res) => {
-    res.render('pages/contact', { title: 'Liên hệ - BizNews' });
+    res.render('pages/contact', {
+        title: 'Liên hệ - BizNews'
+    });
 });
 
+// ================= LOGIN =================
 
-
-app.use(express.urlencoded({ extended: true }));
-
-// 2. Route hiển thị trang Login (GET)
+// Trang login
 app.get('/login', (req, res) => {
-    res.render('pages/login'); // Giả sử bạn có file login.ejs
+    res.render('pages/login');
 });
 
-// 3. Route xử lý khi nhấn nút Đăng nhập (POST)
+app.get('/register', (req, res) => {
+    res.render('pages/register');
+});
+
+
+// Xử lý login (MYSQL)
 app.post('/login', (req, res) => {
-    const email = req.body.email;
-    const password = req.body.password;
+    const { email, password } = req.body;
 
-    // Tạm thời log ra để kiểm tra xem đã nhận được data chưa
-    console.log("Email:", email);
-    console.log("Password:", password);
+    const sql = "SELECT * FROM users WHERE email=? AND password=?";
+    db.query(sql, [email, password], (err, result) => {
 
-    // Logic kiểm tra đăng nhập (Ví dụ đơn giản)
-    if (email === "admin@gmail.com" && password === "123") {
-        res.redirect('/'); // Đăng nhập đúng thì về trang chủ
-    } else {
-        res.send("Sai tài khoản hoặc mật khẩu!");
-    }
+        if (err) {
+            console.error(err);
+            return res.send("❌ Lỗi server!");
+        }
+
+        if (result.length > 0) {
+            res.send(`
+                <script>
+                    alert("Đăng nhập thành công ✅");
+                    window.location.href = "/";
+                </script>
+            `);
+        } else {
+            res.send(`
+                <script>
+                    alert("Sai email hoặc mật khẩu ❌");
+                    window.location.href = "/login";
+                </script>
+            `);
+        }
+    });
 });
-// --- XỬ LÝ LỖI 404 (Nên có) ---
+
+
+//Xử lý đăng ký
+app.post('/register', (req, res) => {
+    const { username, email, password } = req.body;
+
+    const sql = "INSERT INTO `users` (`username`, `email`, `password`) VALUES (?,?,?)";
+    db.query(sql, [username, email, password], (err, result) => {
+
+        if (err) {
+            console.error(err);
+            return res.send("❌ Lỗi server!");
+        }
+
+        if (result.affectedRows > 0) {
+            res.send(`
+                <script>
+                    alert("Đăng ký thành công ✅");
+                    
+                </script>
+            `);
+        } else {
+            res.send(`
+                <script>
+                    alert("Đăng ký thất bại ❌");
+                    
+                </script>
+            `);
+        }
+    });
+});
+
+
+// ================= 404 =================
 app.use((req, res) => {
     res.status(404).send('Không tìm thấy trang!');
 });
 
-
-// --- KHỞI ĐỘNG SERVER ---
+// ================= SERVER =================
 const PORT = 3000;
 app.listen(PORT, () => {
-    console.log(`Server đang chạy tại: http://localhost:${PORT}`);
+    console.log(`🚀 Server chạy tại: http://localhost:${PORT}`);
 });
