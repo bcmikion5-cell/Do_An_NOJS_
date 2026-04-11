@@ -26,26 +26,52 @@ app.get('/', (req, res) => {
     res.render('pages/index', { title: 'Trang chủ - BizNews' });
 });
 
-// Route cho trang liên hệ (Contact) - THÊM PHẦN NÀY
+// Route cho trang danh mục
+app.get('/category', (req, res) => {
+    // Truyền thêm biến categoryName để tránh lỗi "not defined" mà bạn gặp lúc trước
+    res.render('pages/category', { 
+        title: 'Danh mục - BizNews',
+        categoryName: 'Kinh doanh' 
+    });
+});
+
+// Route cho trang chi tiết tin tức
+app.get('/single', (req, res) => {
+    // Đảm bảo file tồn tại tại: views/pages/single.ejs
+    res.render('pages/single', { 
+        title: 'Chi tiết tin tức - BizNews' 
+    });
+});
+
+// Route cho trang liên hệ
 app.get('/contact', (req, res) => {
-    // Nó sẽ render file views/pages/contact.ejs
     res.render('pages/contact', { title: 'Liên hệ - BizNews' });
 });
 
-// Route cho trang danh mục (Category) - THÊM PHẦN NÀY (Nếu bạn đã tách file)
-app.get('/category', (req, res) => {
-    res.render('pages/category', { title: 'Danh mục - BizNews' });
+
+
+app.use(express.urlencoded({ extended: true }));
+
+// 2. Route hiển thị trang Login (GET)
+app.get('/login', (req, res) => {
+    res.render('pages/login'); // Giả sử bạn có file login.ejs
 });
 
-// Route cho trang chi tiết tin tức (Single News) - THÊM PHẦN NÀY
-app.get('/single-news', (req, res) => {
-    res.render('pages/single', { title: 'Chi tiết tin tức - BizNews' });
-});
+// 3. Route xử lý khi nhấn nút Đăng nhập (POST)
+app.post('/login', (req, res) => {
+    const email = req.body.email;
+    const password = req.body.password;
 
-app.get('/category', (req, res) => {
-    res.render('pages/category', { 
-        title: 'Danh mục tin tức - BizNews' 
-    });
+    // Tạm thời log ra để kiểm tra xem đã nhận được data chưa
+    console.log("Email:", email);
+    console.log("Password:", password);
+
+    // Logic kiểm tra đăng nhập (Ví dụ đơn giản)
+    if (email === "admin@gmail.com" && password === "123") {
+        res.redirect('/'); // Đăng nhập đúng thì về trang chủ
+    } else {
+        res.send("Sai tài khoản hoặc mật khẩu!");
+    }
 });
 // --- XỬ LÝ LỖI 404 (Nên có) ---
 app.use((req, res) => {
