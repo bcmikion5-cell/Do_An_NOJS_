@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Máy chủ: 127.0.0.1
--- Thời gian đã tạo: Th4 08, 2026 lúc 06:52 PM
+-- Thời gian đã tạo: Th4 12, 2026 lúc 03:37 PM
 -- Phiên bản máy phục vụ: 10.4.32-MariaDB
 -- Phiên bản PHP: 8.2.12
 
@@ -114,17 +114,21 @@ CREATE TABLE `users` (
   `username` varchar(50) NOT NULL COMMENT 'Tên đăng nhập',
   `email` varchar(100) NOT NULL,
   `password` varchar(255) NOT NULL COMMENT 'Mật khẩu',
-  `ENUM` varchar(255) NOT NULL COMMENT 'Vai trò quản trị',
-  `status` tinyint(1) DEFAULT 1 COMMENT '1: Hoạt động, 0: Bị khóa'
+  `vai_tro` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Đang đổ dữ liệu cho bảng `users`
 --
 
-INSERT INTO `users` (`id`, `username`, `email`, `password`, `ENUM`, `status`) VALUES
-(1, 'Phương', '', '123', 'admin', 1),
-(2, 'Nguyễn Văn A', 'a@gmail.com', '123', 'admin', 0);
+INSERT INTO `users` (`id`, `username`, `email`, `password`, `vai_tro`) VALUES
+(1, 'Phương', 'p@gmail.com', '123', ''),
+(2, 'Nguyễn Văn A', 'a@gmail.com', '123', ''),
+(6, 'b', 'b@gmail.com', '123', ''),
+(7, 'b', 'b@gmail.com', '34213', ''),
+(8, 'c', 'c@gmail.com', '123', ''),
+(9, 'd', 'd@gmail.com', '123', ''),
+(10, 'e', 'e@gmail.com', '123', '');
 
 -- --------------------------------------------------------
 
@@ -140,6 +144,13 @@ CREATE TABLE `website_info` (
   `linkyoutube` varchar(255) DEFAULT NULL COMMENT 'Link Kênh Youtube',
   `thongtinbanquyen` varchar(255) DEFAULT NULL COMMENT 'Thông tin bản quyền'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Đang đổ dữ liệu cho bảng `website_info`
+--
+
+INSERT INTO `website_info` (`id`, `address`, `email`, `linkfacebook`, `linkyoutube`, `thongtinbanquyen`) VALUES
+(1, '123 Đường ABC, Quận 1, TP.HCM', 'lienhe@newsfeed.com', 'https://facebook.com/newsfeed', 'https://youtube.com/newsfeed', 'Bản quyền © 2026 thuộc về Newsfeed');
 
 --
 -- Chỉ mục cho các bảng đã đổ
@@ -226,13 +237,13 @@ ALTER TABLE `subscribers`
 -- AUTO_INCREMENT cho bảng `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT cho bảng `website_info`
 --
 ALTER TABLE `website_info`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

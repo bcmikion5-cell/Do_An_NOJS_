@@ -123,14 +123,14 @@ app.post('/register', (req, res) => {
             res.send(`
                 <script>
                     alert("Đăng ký thành công ✅");
-                    
+                    window.location.href = "/login";
                 </script>
             `);
         } else {
             res.send(`
                 <script>
                     alert("Đăng ký thất bại ❌");
-                    
+                    window.location.href = "/login";
                 </script>
             `);
         }
