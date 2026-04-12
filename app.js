@@ -1,7 +1,9 @@
+const session = require('express-session');
 const express = require('express');
 const path = require('path');
 const expressLayouts = require('express-ejs-layouts');
-const mysql = require('mysql');
+
+const db = require('./csdl/database')
 
 const app = express();
 
@@ -21,22 +23,7 @@ app.set('layout', 'layouts/main');
 // body parser (CHỈ CẦN 1 cái)
 app.use(express.urlencoded({ extended: true }));
 
-// ================= DATABASE =================
-const db = mysql.createConnection({
-    host: "localhost",
-    user: "root",
-    password: "",
-    database: "csdl"
-});
 
-// connect DB
-db.connect((err) => {
-    if (err) {
-        console.error("❌ Kết nối DB lỗi:", err);
-    } else {
-        console.log("✅ Kết nối MySQL thành công!");
-    }
-});
 
 // ================= ROUTES =================
 
@@ -60,6 +47,15 @@ app.get('/single', (req, res) => {
         title: 'Chi tiết tin tức - BizNews'
     });
 });
+
+// admin
+app.get('/dashboard', (req, res) => {
+    res.render('admin/dashboard', {
+        title: 'Liên hệ - BizNews'
+    });
+});
+
+
 
 // Liên hệ
 app.get('/contact', (req, res) => {
@@ -96,7 +92,7 @@ app.post('/login', (req, res) => {
             res.send(`
                 <script>
                     alert("Đăng nhập thành công ✅");
-                    window.location.href = "/";
+                    window.location.href = "/admin/dashboard";
                 </script>
             `);
         } else {
@@ -139,6 +135,111 @@ app.post('/register', (req, res) => {
             `);
         }
     });
+});
+
+
+// ================= ADMIN ROUTES (QUẢN TRỊ VÊN) =================
+
+// Bảng điều khiển (Dashboard)
+app.get('/admin/dashboard', (req, res) => {
+    res.render('admin/dashboard', {
+        title: 'Bảng điều khiển - Admin BizNews'
+    });
+});
+
+// ---------------- 1. QUẢN LÝ DANH MỤC ----------------
+
+// Hiển thị danh sách danh mục
+app.get('/admin/categories', (req, res) => {
+    const sql = "SELECT * FROM categories ORDER BY id DESC";
+    
+    db.query(sql, (err, categories) => {
+        if (err) {
+            console.error(err);
+            return res.send("❌ Lỗi tải danh sách danh mục!");
+        }
+        res.render('admin/categories', {
+            title: 'Quản lý danh mục - Admin',
+            categories: categories
+        });
+    });
+});
+
+// Xử lý thêm danh mục
+app.post('/admin/categories/add', (req, res) => {
+    const { name, description, status } = req.body;
+    
+    const sql = "INSERT INTO categories (name, description, status) VALUES (?, ?, ?)";
+    db.query(sql, [name, description, status || 1], (err, result) => {
+        if (err) {
+            console.error(err);
+            return res.send("❌ Lỗi thêm danh mục!");
+        }
+        res.redirect('/admin/categories'); // Thành công thì quay lại trang danh sách
+    });
+});
+
+// Xử lý xóa danh mục
+app.get('/admin/categories/delete/:id', (req, res) => {
+    const id = req.params.id;
+    
+    const sql = "DELETE FROM categories WHERE id = ?";
+    db.query(sql, [id], (err, result) => {
+        if (err) {
+            console.error(err);
+            return res.send(`
+                <script>
+                    alert("❌ Không thể xóa! (Có thể danh mục đang chứa bài viết)");
+                    window.location.href = "/admin/categories";
+                </script>
+            `);
+        }
+        res.redirect('/admin/categories');
+    });
+});
+
+// ---------------- 2. QUẢN LÝ BÀI VIẾT ----------------
+
+// Hiển thị danh sách bài viết
+app.get('/admin/posts', (req, res) => {
+    // Dùng LEFT JOIN để lấy tên danh mục hiển thị cùng bài viết
+    const sql = `
+        SELECT posts.*, categories.name AS category_name 
+        FROM posts 
+        LEFT JOIN categories ON posts.category_id = categories.id 
+        ORDER BY posts.id DESC
+    `;
+    
+    db.query(sql, (err, posts) => {
+        if (err) {
+            console.error(err);
+            return res.send("❌ Lỗi tải danh sách bài viết!");
+        }
+        res.render('admin/posts', {
+            title: 'Quản lý bài viết - Admin',
+            posts: posts
+        });
+    });
+});
+
+// Xóa bài viết
+app.get('/admin/posts/delete/:id', (req, res) => {
+    const id = req.params.id;
+    
+    const sql = "DELETE FROM posts WHERE id = ?";
+    db.query(sql, [id], (err, result) => {
+        if (err) {
+            console.error(err);
+            return res.send("❌ Lỗi xóa bài viết!");
+        }
+        res.redirect('/admin/posts');
+    });
+});
+
+
+// Route Đăng xuất
+app.get('/admin/logout', (req, res) => {
+    res.redirect('/login'); 
 });
 
 
