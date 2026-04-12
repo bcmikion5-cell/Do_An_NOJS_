@@ -1,0 +1,132 @@
+<%- include('partials/header') %>
+
+    <div class="container-fluid">
+        <div
+            class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+            <h1 class="h2">Quản lý người dùng</h1>
+        </div>
+
+        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addModal">Thêm danh mục</button>
+
+        <div class="modal fade" id="addModal">
+            <div class="modal-dialog">
+                <div class="modal-content">
+
+                    <div class="modal-header">
+                        <h5 class="modal-title">Thêm danh mục</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+
+                    <div class="modal-body">
+                        <form action="/admin/categories/add" method="POST">
+
+                            <div class="mb-3">
+                                <label>Tên danh mục</label>
+                                <input type="text" name="name" class="form-control" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label>Mô tả</label>
+                                <textarea name="description" class="form-control"></textarea>
+                            </div>
+
+                            <div class="mb-3">
+                                <label>Trạng thái</label>
+                                <select name="status" class="form-control">
+                                    <option value="1">Hoạt động</option>
+                                    <option value="0">Bị khóa</option>
+                                </select>
+                            </div>
+
+                            <button class="btn btn-success">Thêm</button>
+
+                        </form>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-striped table-sm">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Tên danh mục</th>
+                        <th>Miêu tả</th>
+                        <th>Trạng thái</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% categories.forEach(cate=> { %>
+                        <tr>
+                            <td>
+                                <%= cate.id %>
+                            </td>
+                            <td>
+                                <%= cate.name %>
+                            </td>
+                            <td>
+                                <%= cate.description %>
+                            </td>
+                            <td>
+                                <span class="badge <%= cate.status == 1 ? 'bg-success' : 'bg-danger' %>">
+                                    <%= cate.status==1 ? 'Hoạt động' : 'Bị khóa' %>
+                                </span>
+                            </td>
+                            <td>
+                                <a href="/admin/categories/delete/<%= cate.id %>" class="btn btn-sm btn-outline-danger"
+                                    onclick="return confirm('Bạn có chắc chắn muốn xóa danh mục này?')">🗑️Xóa</a>
+
+                                <button type="button" class="btn btn-sm btn-warning"
+                                    onclick='openEditModal(<%= cate.id %>, <%- JSON.stringify(cate.name) %>, <%- JSON.stringify(cate.description) %>, <%= cate.status %>)'>
+                                    ✏️Sửa</button>
+                            </td>
+                        </tr>
+                        <% }) %>
+                </tbody>
+
+            </table>
+        </div>
+    </div>
+    <div class="modal fade" id="editModal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+
+                <div class="modal-header bg-success">
+                    <h5 class="modal-title">Sửa danh mục</h5>
+                </div>
+
+                <div class="modal-body">
+                    <form id="editForm" action="/admin/categories/update" method="POST">
+
+                        <input type="text" id="editName" name="name" class="form-control mb-2" required>
+                        <textarea id="editDesc" name="description" class="form-control mb-2"></textarea>
+
+                        <select id="editStatus" name="status" class="form-control mb-2">
+                            <option value="1">Hoạt động</option>
+                            <option value="0">Bị khóa</option>
+                        </select>
+
+                        <button class="btn btn-success w-100">Cập nhật</button>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            window.openEditModal = function (id, name, description, status) {
+                document.getElementById('editName').value = name;
+                document.getElementById('editDesc').value = description;
+                document.getElementById('editStatus').value = status;
+
+                document.getElementById('editForm').action = '/admin/categories/update/' + id;
+
+                new bootstrap.Modal(document.getElementById('editModal')).show();
+            }
+        });
+    </script>
+    <%- include('partials/footer') %>
