@@ -183,57 +183,78 @@ app.get('/admin/users/delete/:id', (req, res) => {
         
     });
 });
-// ---------------- 1. QUẢN LÝ DANH MỤC ----------------
+//---------------- 1. QUẢN LÝ DANH MỤC ----------------
 
-// // Hiển thị danh sách danh mục
-// app.get('/admin/categories', (req, res) => {
-//     const sql = "SELECT * FROM categories ORDER BY id DESC";
+// Hiển thị danh sách danh mục
+app.get('/admin/categories', (req, res) => {
+    const sql = "SELECT * FROM categories ORDER BY id DESC";
     
-//     db.query(sql, (err, categories) => {
-//         if (err) {
-//             console.error(err);
-//             return res.send("❌ Lỗi tải danh sách danh mục!");
-//         }
-//         res.render('admin/categories', {
-//             title: 'Quản lý danh mục - Admin',
-//             categories: categories
-//         });
-//     });
-// });
+    db.query(sql, (err, categories) => {
+        if (err) {
+            console.error(err);
+            return res.send("❌ Lỗi tải danh sách danh mục!");
+        }
+        res.render('admin/categories', {
+            title: 'Quản lý danh mục - Admin',
+            categories: categories
+        });
+    });
+});
 
-// // Xử lý thêm danh mục
-// app.post('/admin/categories/add', (req, res) => {
-//     const { name, description, status } = req.body;
+// Xử lý thêm danh mục
+app.post('/admin/categories/add', (req, res) => {
+    const { name, description, status } = req.body;
     
-//     const sql = "INSERT INTO categories (name, description, status) VALUES (?, ?, ?)";
-//     db.query(sql, [name, description, status || 1], (err, result) => {
-//         if (err) {
-//             console.error(err);
-//             return res.send("❌ Lỗi thêm danh mục!");
-//         }
-//         res.redirect('/admin/categories'); // Thành công thì quay lại trang danh sách
-//     });
-// });
+    const sql = "INSERT INTO categories (name, description, status) VALUES (?, ?, ?)";
+    db.query(sql, [name, description, status || 1], (err, result) => {
+        if (err) {
+            console.error(err);
+            return res.send("❌ Lỗi thêm danh mục!");
+        }
+        res.redirect('/admin/categories'); // Thành công thì quay lại trang danh sách
+    });
+});
 
-// // Xử lý xóa danh mục
-// app.get('/admin/categories/delete/:id', (req, res) => {
-//     const id = req.params.id;
+// Xử lý xóa danh mục
+app.get('/admin/categories/delete/:id', (req, res) => {
+    const id = req.params.id;
     
-//     const sql = "DELETE FROM categories WHERE id = ?";
-//     db.query(sql, [id], (err, result) => {
-//         if (err) {
-//             console.error(err);
-//             return res.send(`
-//                 <script>
-//                     alert("❌ Không thể xóa! (Có thể danh mục đang chứa bài viết)");
-//                     window.location.href = "/admin/categories";
-//                 </script>
-//             `);
-//         }
-//         res.redirect('/admin/categories');
-//     });
-// });
+    const sql = "DELETE FROM categories WHERE id = ?";
+    db.query(sql, [id], (err, result) => {
+        if (err) {
+            console.error(err);
+            return res.send(`
+                <script>
+                    alert("❌ Không thể xóa! (Có thể danh mục đang chứa bài viết)");
+                    window.location.href = "/admin/categories";
+                </script>
+            `);
+        }
+        res.redirect('/admin/categories');
+    });
+});
 
+// Xử lý sửa danh mục
+app.post('/admin/categories/update/:id', (req, res) => {
+    const id = req.params.id;
+    const { name, description, status } = req.body;
+
+    if (!name) {
+        return res.send("Tên danh mục không được để trống");
+    }
+
+    const statusValue = parseInt(status) || 0;
+
+    const sql = "UPDATE categories SET name=?, description=?, status=? WHERE id=?";
+    db.query(sql, [name, description, statusValue, id], (err) => {
+        if (err) {
+            console.error(err);
+            return res.send("Lỗi cập nhật danh mục");
+        }
+
+        res.redirect('/admin/categories');
+    });
+});
 // // ---------------- 2. QUẢN LÝ BÀI VIẾT ----------------
 
 // // Hiển thị danh sách bài viết
