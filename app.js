@@ -8,6 +8,13 @@ const db = require('./csdl/database')
 const app = express();
 
 // ================= CẤU HÌNH =================
+// Cấu hình Session
+app.use(session({
+    secret: 'biznews_secret_key', // Chuỗi bí mật bất kỳ
+    resave: false,
+    saveUninitialized: true,
+    //cookie: { maxAge: 3600000 } // Session tồn tại trong 1 giờ
+}));
 
 // static folder
 app.use(express.static(path.join(__dirname, 'public')));
@@ -68,6 +75,7 @@ app.get('/contact', (req, res) => {
 
 // Trang login
 app.get('/login', (req, res) => {
+    
     res.render('pages/login');
 });
 
@@ -89,6 +97,7 @@ app.post('/login', (req, res) => {
         }
 
         if (result.length > 0) {
+            req.session.admin = result[0];
             res.send(`
                 <script>
                     alert("Đăng nhập thành công ✅");
@@ -138,107 +147,128 @@ app.post('/register', (req, res) => {
 });
 
 
+
+
 // ================= ADMIN ROUTES (QUẢN TRỊ VÊN) =================
 
 // Bảng điều khiển (Dashboard)
 app.get('/admin/dashboard', (req, res) => {
+    if (!req.session.admin) return res.redirect('/login');
     res.render('admin/dashboard', {
         title: 'Bảng điều khiển - Admin BizNews'
     });
 });
 
+//quản lý người dùng
+app.get('/admin/users', (req, res) => {
+    if (!req.session.admin) return res.redirect('/login');
+
+    const sql = "SELECT id, username, email FROM users ORDER BY id DESC";
+    db.query(sql, (err, results) => {
+        if (err) throw err;
+        res.render('admin/users', {
+            title: 'Quản lý người dùng',
+            users: results,
+            adminName: req.session.admin.username
+        });
+    });
+});
+
 // ---------------- 1. QUẢN LÝ DANH MỤC ----------------
 
-// Hiển thị danh sách danh mục
-app.get('/admin/categories', (req, res) => {
-    const sql = "SELECT * FROM categories ORDER BY id DESC";
+// // Hiển thị danh sách danh mục
+// app.get('/admin/categories', (req, res) => {
+//     const sql = "SELECT * FROM categories ORDER BY id DESC";
     
-    db.query(sql, (err, categories) => {
-        if (err) {
-            console.error(err);
-            return res.send("❌ Lỗi tải danh sách danh mục!");
-        }
-        res.render('admin/categories', {
-            title: 'Quản lý danh mục - Admin',
-            categories: categories
-        });
-    });
-});
+//     db.query(sql, (err, categories) => {
+//         if (err) {
+//             console.error(err);
+//             return res.send("❌ Lỗi tải danh sách danh mục!");
+//         }
+//         res.render('admin/categories', {
+//             title: 'Quản lý danh mục - Admin',
+//             categories: categories
+//         });
+//     });
+// });
 
-// Xử lý thêm danh mục
-app.post('/admin/categories/add', (req, res) => {
-    const { name, description, status } = req.body;
+// // Xử lý thêm danh mục
+// app.post('/admin/categories/add', (req, res) => {
+//     const { name, description, status } = req.body;
     
-    const sql = "INSERT INTO categories (name, description, status) VALUES (?, ?, ?)";
-    db.query(sql, [name, description, status || 1], (err, result) => {
-        if (err) {
-            console.error(err);
-            return res.send("❌ Lỗi thêm danh mục!");
-        }
-        res.redirect('/admin/categories'); // Thành công thì quay lại trang danh sách
-    });
-});
+//     const sql = "INSERT INTO categories (name, description, status) VALUES (?, ?, ?)";
+//     db.query(sql, [name, description, status || 1], (err, result) => {
+//         if (err) {
+//             console.error(err);
+//             return res.send("❌ Lỗi thêm danh mục!");
+//         }
+//         res.redirect('/admin/categories'); // Thành công thì quay lại trang danh sách
+//     });
+// });
 
-// Xử lý xóa danh mục
-app.get('/admin/categories/delete/:id', (req, res) => {
-    const id = req.params.id;
+// // Xử lý xóa danh mục
+// app.get('/admin/categories/delete/:id', (req, res) => {
+//     const id = req.params.id;
     
-    const sql = "DELETE FROM categories WHERE id = ?";
-    db.query(sql, [id], (err, result) => {
-        if (err) {
-            console.error(err);
-            return res.send(`
-                <script>
-                    alert("❌ Không thể xóa! (Có thể danh mục đang chứa bài viết)");
-                    window.location.href = "/admin/categories";
-                </script>
-            `);
-        }
-        res.redirect('/admin/categories');
-    });
-});
+//     const sql = "DELETE FROM categories WHERE id = ?";
+//     db.query(sql, [id], (err, result) => {
+//         if (err) {
+//             console.error(err);
+//             return res.send(`
+//                 <script>
+//                     alert("❌ Không thể xóa! (Có thể danh mục đang chứa bài viết)");
+//                     window.location.href = "/admin/categories";
+//                 </script>
+//             `);
+//         }
+//         res.redirect('/admin/categories');
+//     });
+// });
 
-// ---------------- 2. QUẢN LÝ BÀI VIẾT ----------------
+// // ---------------- 2. QUẢN LÝ BÀI VIẾT ----------------
 
-// Hiển thị danh sách bài viết
-app.get('/admin/posts', (req, res) => {
-    // Dùng LEFT JOIN để lấy tên danh mục hiển thị cùng bài viết
-    const sql = `
-        SELECT posts.*, categories.name AS category_name 
-        FROM posts 
-        LEFT JOIN categories ON posts.category_id = categories.id 
-        ORDER BY posts.id DESC
-    `;
+// // Hiển thị danh sách bài viết
+// app.get('/admin/posts', (req, res) => {
+//     // Dùng LEFT JOIN để lấy tên danh mục hiển thị cùng bài viết
+//     const sql = `
+//         SELECT posts.*, categories.name AS category_name 
+//         FROM posts 
+//         LEFT JOIN categories ON posts.category_id = categories.id 
+//         ORDER BY posts.id DESC
+//     `;
     
-    db.query(sql, (err, posts) => {
-        if (err) {
-            console.error(err);
-            return res.send("❌ Lỗi tải danh sách bài viết!");
-        }
-        res.render('admin/posts', {
-            title: 'Quản lý bài viết - Admin',
-            posts: posts
-        });
-    });
-});
+//     db.query(sql, (err, posts) => {
+//         if (err) {
+//             console.error(err);
+//             return res.send("❌ Lỗi tải danh sách bài viết!");
+//         }
+//         res.render('admin/posts', {
+//             title: 'Quản lý bài viết - Admin',
+//             posts: posts
+//         });
+//     });
+// });
 
-// Xóa bài viết
-app.get('/admin/posts/delete/:id', (req, res) => {
-    const id = req.params.id;
+// // Xóa bài viết
+// app.get('/admin/posts/delete/:id', (req, res) => {
+//     const id = req.params.id;
     
-    const sql = "DELETE FROM posts WHERE id = ?";
-    db.query(sql, [id], (err, result) => {
-        if (err) {
-            console.error(err);
-            return res.send("❌ Lỗi xóa bài viết!");
-        }
-        res.redirect('/admin/posts');
-    });
-});
+//     const sql = "DELETE FROM posts WHERE id = ?";
+//     db.query(sql, [id], (err, result) => {
+//         if (err) {
+//             console.error(err);
+//             return res.send("❌ Lỗi xóa bài viết!");
+//         }
+//         res.redirect('/admin/posts');
+//     });
+// });
+
+
 
 
 // Route Đăng xuất
 app.get('/admin/logout', (req, res) => {
+    req.session.destroy();
     res.redirect('/login'); 
 });
 
