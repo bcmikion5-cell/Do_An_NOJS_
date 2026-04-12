@@ -173,7 +173,16 @@ app.get('/admin/users', (req, res) => {
         });
     });
 });
+app.get('/admin/users/delete/:id', (req, res) => {
+    const id = req.params.id;
 
+    const sql = "DELETE FROM users WHERE id = ?";
+    db.query(sql, [id], (err) => {
+        if (err) throw err;
+        res.redirect('/admin/users');
+        
+    });
+});
 // ---------------- 1. QUẢN LÝ DANH MỤC ----------------
 
 // // Hiển thị danh sách danh mục
