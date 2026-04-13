@@ -6,8 +6,34 @@ const db = require('../csdl/database');
 
 // Trang chủ
 router.get('/', (req, res) => {
-    res.render('pages/index', { title: 'Trang chủ - BizNews' });
+    // 1. Lấy tin mới nhất
+    const sqlLatest = "SELECT * FROM posts WHERE status = 1 ORDER BY id DESC LIMIT 6";
+    
+    // 2. Lấy tin xem nhiều (Nhớ đảm bảo bảng posts của bạn có cột views nhé)
+    const sqlTrending = "SELECT * FROM posts WHERE status = 1 ORDER BY views DESC LIMIT 6";
+
+    db.query(sqlLatest, (err, latestPosts) => {
+        if (err) {
+            console.error("Lỗi truy vấn mới nhất:", err);
+            return res.send("Lỗi cơ sở dữ liệu!");
+        }
+
+        db.query(sqlTrending, (err, trendingPosts) => {
+            if (err) {
+                console.error("Lỗi truy vấn trending:", err);
+                return res.send("Lỗi cơ sở dữ liệu!");
+            }
+
+            // ĐÂY LÀ CHỖ QUAN TRỌNG NHẤT: Bắn dữ liệu sang EJS
+            res.render('pages/index', { 
+                title: 'Trang chủ - BizNews',
+                latestPosts: latestPosts,     // Phải truyền biến này sang
+                trendingPosts: trendingPosts  // Phải truyền cả biến này sang nữa
+            });
+        });
+    });
 });
+
 
 // Danh mục
 router.get('/category', (req, res) => {
