@@ -36,42 +36,47 @@
         <h3 class="text-primary text-uppercase">Xem Nhiều Nhất</h3>
     </div>
 
-    <div class="row">
-        <% if(typeof trendingPosts !== 'undefined' && trendingPosts.length > 0) { %>
-            <% trendingPosts.forEach(post => { %>
-                <div class="col-md-6 mb-4">
-                    <div class="card h-100 shadow-sm">
-                        <div class="row g-0 h-100">
-                            <div class="col-md-4">
-                                <img src="/img/<%= post.image %>" class="img-fluid rounded-start h-100 w-100" alt="<%= post.title %>" style="object-fit: cover; min-height: 150px;">
-                            </div>
-                            
-                            <div class="col-md-8">
-                                <div class="card-body">
-                                   
-                                        <a href="/single/<%= post.id %>" class="badge badge-primary text-uppercase font-weight-semi-bold p-2 mr-2"><%= post.title %></a>
-                                  
-                                 
-                                    <a class="text-muted small mb-2">
-                                        <%= new Date(post.ngaydang).toLocaleDateString('vi-VN') %>
-                                    </a>
+    
+    <% if(typeof trendingPosts !== 'undefined' && trendingPosts.length > 0) { %>
+        <% trendingPosts.forEach(post => { %>
+            <div class="col-md-10 mb-8">
+                <div class="card h-100 shadow-sm">
 
-                                    <p class="card-text h5"><%= post.summary %></p>
-                                    <p class="card-text small"><%= post.content %></p>
+                    <!-- Ảnh -->
+                    <img src="/img/<%= post.image %>" 
+                         class="card-img-top" 
+                         alt="<%= post.title %>">
 
-                                    <hr>                                  
-                                        <small class="ml-3"><i class="far fa-eye mr-2"></i><%= post.views %></small>
-                                        <small class="ml-3"><i class="far fa-comment mr-2"></i><%= post.comment %></small>
+                    <!-- Nội dung -->
+                    <div class="card-body">
+                        <a href="/single/<%= post.id %>" 
+                           class="badge text-uppercase d-inline-block">
+                            <%= post.title %>
+                        </a>
 
-                                </div>
-                            </div>
-                        </div>
+                        <p class="text-muted small mb-2">
+                            <%= new Date(post.ngaydang).toLocaleDateString('vi-VN') %>
+                        </p>
+
+                        <p class="card-text h5"><%= post.summary %></p>
+                        <p class="card-text small"><%= post.content %></p>
+
+                        <hr>
+
+                        <small class="me-3">
+                            👁 <%= post.views %>
+                        </small>
+                        <small>
+                            💬 <%= post.comment %>
+                        </small>
                     </div>
+
                 </div>
-            <% }) %>
-        <% } else { %>
-            <div class="col-12"><p>Chưa có tin tức xem nhiều.</p></div>
-        <% } %>
-    </div>
+            </div>
+        <% }) %>
+    <% } else { %>
+        <div class="col-12"><p>Chưa có tin tức xem nhiều.</p></div>
+    <% } %>
+
 
 </div>

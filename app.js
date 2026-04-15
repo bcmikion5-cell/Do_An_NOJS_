@@ -24,7 +24,7 @@ app.set('views', path.join(__dirname, 'views'));
 app.use(expressLayouts);
 app.set('layout', 'layouts/main');
 
-// body parser (CHỈ CẦN 1 cái)
+// body parser 
 app.use(express.urlencoded({ extended: true }));
 
 
@@ -44,5 +44,5 @@ app.use((req, res) => {
 // ================= SERVER =================
 const PORT = 3000;
 app.listen(PORT, () => {
-    console.log(`🚀 Server chạy tại: http://localhost:${PORT}`);
+    console.log(`Server chạy tại: http://localhost:${PORT}`);
 });
