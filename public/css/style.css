@@ -17,7 +17,7 @@
   font-size: 1rem;
   margin-bottom: 2px;
   display: -webkit-box;
-  -webkit-line-clamp: 1;
+  /*-webkit-line-clamp: 1;
   /* Hiện tối đa 1 dòng tiêu đề */
   -webkit-box-orient: vertical;
   overflow: hidden;
