@@ -148,10 +148,11 @@ router  .post('/register', (req, res) => {
 // ==========================================
 router.get('/single/:id', (req, res) => {
     const postId = req.params.id;
-
+    const isFromComment = req.query.commented;
     // Tăng lượt xem lên 1
+    if (!isFromComment) {
     db.query("UPDATE posts SET views = views + 1 WHERE id = ?", [postId]);
-
+    }
     // 1. Lấy chi tiết bài viết
     const sqlDetail = "SELECT * FROM posts WHERE id = ?";
     db.query(sqlDetail, [postId], (err, postResults) => {
@@ -199,7 +200,8 @@ router.post('/comment', (req, res) => {
         else
         {
             db.query("UPDATE posts SET comment = comment + 1 WHERE id = ?", [post_id]);
-            res.redirect('/single/' + post_id);
+            
+            res.redirect('/single/' + post_id + '?commented=true');
         }
         
     });

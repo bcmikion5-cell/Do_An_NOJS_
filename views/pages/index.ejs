@@ -36,42 +36,54 @@
         <h3 class="text-primary text-uppercase">Xem Nhiều Nhất</h3>
     </div>
 
-    <div class="row">
-        <% if(typeof trendingPosts !== 'undefined' && trendingPosts.length > 0) { %>
-            <% trendingPosts.forEach(post => { %>
-                <div class="col-md-6 mb-4">
-                    <div class="card h-100 shadow-sm">
-                        <img src="/img/<%= post.image %>" 
-                             class="card-img-top" 
-                             alt="<%= post.title %>">
+    
+    <% if(typeof trendingPosts !== 'undefined' && trendingPosts.length > 0) { %>
+        <% trendingPosts.forEach(post => { %>
+            <div class="col-md-10 mb-8">
+                <div class="card h-100 shadow-sm">
+<a href="/single/<%= post.id %>" >
+                    <!-- Ảnh -->
+                    <img src="/img/<%= post.image %>" 
+                         class="card-img-top" 
+                         alt="<%= post.title %>">
+</a>
+                    <!-- Nội dung -->
+                    <div class="card-body">
+                        <a href="/single/<%= post.id %>" 
+                           class="badge text-primary d-inline-block">
+                            <%= post.title %>
+                        </a>
 
-                        <div class="card-body">
-                            <a href="/single/<%= post.id %>" 
-                               class="badge bg-primary text-uppercase d-inline-block mb-2 text-decoration-none">
-                                <%= post.title %>
+                        <p class="text-muted small mb-2">
+                            <a href="/single/<%= post.id %>" >
+                            <%= new Date(post.ngaydang).toLocaleDateString('vi-VN') %>
                             </a>
+                        </p>
+<a href="/single/<%= post.id %>" >
+                        <p class="card-text h5"><%= post.summary %></p>
+</a>
+ <a href="/single/<%= post.id %>" >
+                          <p class="card-text small"><%= post.content %></p>
+</a> 
+                        <hr>
 
-                            <p class="text-muted small mb-2">
-                                📅 <%= new Date(post.ngaydang).toLocaleDateString('vi-VN') %>
-                            </p>
-
-                            <p class="card-text h5"><%= post.summary %></p>
-                            <p class="card-text small"><%= post.content %></p>
-
-                            <hr>
-
-                            <small class="me-3">
-                                👁 <%= post.views %>
-                            </small>
-                            <small>
-                                💬 <%= post.comment %>
-                            </small>
-                        </div>
+                        <small class="me-3">
+                            👁 <%= post.views %>
+                        </small>
+                        <small>
+                         <a href="/single/<%= post.id %>" >
+                            💬 <%= post.comment %>
+                            </a>    
+                        </small>
+                            
                     </div>
+
                 </div>
-            <% }) %>
-        <% } else { %>
-            <div class="col-12"><p>Chưa có tin tức xem nhiều.</p></div>
-        <% } %>
-    </div>
+            </div>
+        <% }) %>
+    <% } else { %>
+        <div class="col-12"><p>Chưa có tin tức xem nhiều.</p></div>
+    <% } %>
+
+
 </div>

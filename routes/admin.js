@@ -195,6 +195,7 @@ router.get('/posts/add', (req, res) => {
             categories: categories,
             layout: false 
         });
+        res.redirect('/admin/posts');
     });
 });
 
