@@ -39,11 +39,11 @@
     <div class="row">
         <% if(typeof trendingPosts !== 'undefined' && trendingPosts.length > 0) { %>
             <% trendingPosts.forEach(post => { %>
-                <div class="col-md-6 mb-4">
+                <div class="col-md-6 mb-4 ">
                     <div class="card h-100 shadow-sm">
                         <div class="row g-0 h-100">
                             <div class="col-md-4">
-                                <img src="/img/<%= post.image %>" class="img-fluid rounded-start h-100 w-100" alt="<%= post.title %>" style="object-fit: cover; min-height: 150px;">
+                                <img src="/img/<%= post.image %>" class="img-fluid rounded-start h-500 w-500" alt="<%= post.title %>" style="object-fit: cover; min-height: 150px;">
                             </div>
                             
                             <div class="col-md-8">

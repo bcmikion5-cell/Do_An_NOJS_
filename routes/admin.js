@@ -35,7 +35,7 @@ router.get('/users/delete/:id', (req, res) => {
     db.query(sql, [id], (err) => {
         if (err) throw err;
         res.redirect('/admin/users');
-        
+
     });
 });
 
@@ -44,7 +44,7 @@ router.get('/users/delete/:id', (req, res) => {
 // Hiển thị danh sách danh mục
 router.get('/categories', (req, res) => {
     const sql = "SELECT * FROM categories ORDER BY id DESC";
-    
+
     db.query(sql, (err, categories) => {
         if (err) {
             console.error(err);
@@ -61,7 +61,7 @@ router.get('/categories', (req, res) => {
 // Xử lý thêm danh mục
 router.post('/categories/add', (req, res) => {
     const { name, description, status } = req.body;
-    
+
     const sql = "INSERT INTO categories (name, description, status) VALUES (?, ?, ?)";
     db.query(sql, [name, description, status || 1], (err, result) => {
         if (err) {
@@ -76,7 +76,7 @@ router.post('/categories/add', (req, res) => {
 // Xử lý xóa danh mục
 router.get('/categories/delete/:id', (req, res) => {
     const id = req.params.id;
-    
+
     const sql = "DELETE FROM categories WHERE id = ?";
     db.query(sql, [id], (err, result) => {
         if (err) {
@@ -125,7 +125,7 @@ router.post('/categories/update/:id', (req, res) => {
 //         LEFT JOIN categories ON posts.category_id = categories.id 
 //         ORDER BY posts.id DESC
 //     `;
-    
+
 //     db.query(sql, (err, posts) => {
 //         if (err) {
 //             console.error(err);
@@ -141,7 +141,7 @@ router.post('/categories/update/:id', (req, res) => {
 // // Xóa bài viết
 // app.get('/admin/posts/delete/:id', (req, res) => {
 //     const id = req.params.id;
-    
+
 //     const sql = "DELETE FROM posts WHERE id = ?";
 //     db.query(sql, [id], (err, result) => {
 //         if (err) {
@@ -156,7 +156,75 @@ router.post('/categories/update/:id', (req, res) => {
 // Route Đăng xuất
 router.get('/logout', (req, res) => {
     req.session.destroy();
-    res.redirect('/login'); 
+    res.redirect('/login');
+});
+// Giả sử API của bạn trả về danh sách bài viết
+// ---------------- 2. QUẢN LÝ BÀI VIẾT ----------------
+
+// Hiển thị danh sách bài viết
+// --- QUẢN LÝ BÀI VIẾT ---
+
+// 1. Trang danh sách bài viết
+router.get('/posts', (req, res) => {
+    if (!req.session.admin) return res.redirect('/login');
+
+    const sql = `
+        SELECT posts.*, categories.name AS category_name 
+        FROM posts 
+        LEFT JOIN categories ON posts.category_id = categories.id 
+        ORDER BY posts.id DESC
+    `;
+    
+    db.query(sql, (err, results) => {
+        if (err) throw err;
+        res.render('admin/posts', {
+            title: 'Danh sách bài viết',
+            posts: results,
+            adminName: req.session.admin.username,
+            layout: false
+        });
+    });
+});
+
+// 2. Trang form thêm bài viết
+router.get('/posts/add', (req, res) => {
+    db.query("SELECT * FROM categories", (err, categories) => {
+        if (err) throw err;
+        res.render('admin/add_post', { 
+            title: 'Thêm bài viết',
+            categories: categories,
+            layout: false 
+        });
+    });
+});
+
+// 3. Xử lý lưu bài viết (POST)
+router.post('/posts/add', (req, res) => {
+    const { title, content, image, category_id, status } = req.body;
+    const sql = "INSERT INTO posts (title, content, image, category_id, status) VALUES (?, ?, ?, ?, ?)";
+    
+    db.query(sql, [title, content, image, category_id, status || 1], (err) => {
+        if (err) {
+            console.error(err);
+            return res.send("Lỗi lưu database!");
+        }
+        res.redirect('/admin/posts');
+    });
+});
+// Xóa bài viết
+router.get('/posts/delete/:id', (req, res) => {
+    if (!req.session.admin) return res.redirect('/login');
+
+    const id = req.params.id;
+    const sql = "DELETE FROM posts WHERE id = ?";
+
+    db.query(sql, [id], (err, result) => {
+        if (err) {
+            console.error(err);
+            return res.send("❌ Lỗi xóa bài viết!");
+        }
+        res.redirect('/admin/posts');
+    });
 });
 
 
