@@ -17,77 +17,83 @@
 <body>
 
     <div class="container py-5">
-    <form action="/admin/posts/add" method="POST">
-        <div class="row">
-            <div class="col-md-8">
-                <div class="card shadow-sm border-0 p-4 mb-4">
-                    <h3 class="mb-4 text-primary fw-bold"><i class="bi bi-pencil-square"></i> Nội dung bài viết</h3>
-                    
-                    <div class="mb-4">
-                        <label for="title" class="form-label fw-bold">Tiêu đề bài viết</label>
-                        <input type="text" id="title" name="title" class="form-control form-control-lg" 
-                               placeholder="Nhập tiêu đề hấp dẫn tại đây..." required>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="content" class="form-label fw-bold">Nội dung chi tiết</label>
-                        <textarea id="content" name="content" class="form-control" rows="15" 
-                                  placeholder="Viết nội dung bài viết của bạn..." required></textarea>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-4">
-                <div class="bg-light p-4 rounded-3 border shadow-sm">
-                    <div class="mb-4">
-                        <label class="form-label fw-bold"><i class="bi bi-tag-fill me-2"></i>Chuyên mục</label>
-                        <select name="category_id" class="form-select" required>
-                            <option value="" selected disabled>Chọn danh mục...</option>
-                            <% categories.forEach(cat=> { %>
-                                <option value="<%= cat.id %>">
-                                    <%= cat.name %>
-                                </option>
-                            <% }) %>
-                        </select>
-                    </div>
-
-                    <div class="mb-4">
-                        <label class="form-label fw-bold"><i class="bi bi-image me-2"></i>Link hình ảnh</label>
-                        <input type="text" name="image" id="imageInput" class="form-control"
-                            placeholder="https://imgur.com/abc.jpg">
-
-                        <div class="mt-3 p-2 border rounded bg-white text-center" style="min-height: 150px;">
-                            <p class="text-muted small mb-2">Xem trước hình ảnh:</p>
-                            <img id="imagePreview" src="https://via.placeholder.com/300x200?text=No+Image+Selected"
-                                class="img-fluid rounded shadow-sm" style="max-height: 200px; width: 100%; object-fit: cover;">
-                        </div>
-                    </div>
-
-                    <div class="mb-4">
-                        <label class="form-label fw-bold"><i class="bi bi-eye-fill me-2"></i>Trạng thái</label>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="status" id="status1" value="1" checked>
-                            <label class="form-check-label" for="status1">Công khai ngay</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="status" id="status0" value="0">
-                            <label class="form-check-label" for="status0">Lưu bản nháp</label>
-                        </div>
-                    </div>
-
-                    <hr class="my-4">
-
-                    <div class="d-grid gap-2">
-                        <button type="submit" class="btn btn-primary btn-lg fw-bold">
-                            <i class="bi bi-cloud-arrow-up-fill me-2"></i>ĐĂNG BÀI VIẾT
-                        </button>
-                        <button type="reset" class="btn btn-outline-secondary" onclick="resetPreview()">Làm mới Form</button>
-                    </div>
-                </div>
-            </div>
+        <div class="mb-4">
+            <a href="/admin/posts" class="btn btn-outline-secondary shadow-sm">
+                <i class="bi bi-arrow-left"></i> Quay lại danh sách
+            </a>
         </div>
-    </form>
-</div>
+
+        <form action="/admin/posts/add" method="POST">
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="card shadow-sm border-0 p-4 mb-4">
+                        <h3 class="mb-4 text-primary fw-bold"><i class="bi bi-pencil-square"></i> Nội dung bài viết</h3>
+                        
+                        <div class="mb-4">
+                            <label for="title" class="form-label fw-bold">Tiêu đề bài viết</label>
+                            <input type="text" id="title" name="title" class="form-control form-control-lg" 
+                                   placeholder="Nhập tiêu đề hấp dẫn tại đây..." required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="content" class="form-label fw-bold">Nội dung chi tiết</label>
+                            <textarea id="content" name="content" class="form-control" rows="15" 
+                                      placeholder="Viết nội dung bài viết của bạn..." required></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="bg-light p-4 rounded-3 border shadow-sm">
+                        <div class="mb-4">
+                            <label class="form-label fw-bold"><i class="bi bi-tag-fill me-2"></i>Chuyên mục</label>
+                            <select name="category_id" class="form-select" required>
+                                <option value="" selected disabled>Chọn danh mục...</option>
+                                <% categories.forEach(cat=> { %>
+                                    <option value="<%= cat.id %>">
+                                        <%= cat.name %>
+                                    </option>
+                                <% }) %>
+                            </select>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-bold"><i class="bi bi-image me-2"></i>Link hình ảnh</label>
+                            <input type="text" name="image" id="imageInput" class="form-control"
+                                placeholder="https://imgur.com/abc.jpg">
+
+                            <div class="mt-3 p-2 border rounded bg-white text-center" style="min-height: 150px;">
+                                <p class="text-muted small mb-2">Xem trước hình ảnh:</p>
+                                <img id="imagePreview" src="https://via.placeholder.com/300x200?text=No+Image+Selected"
+                                    class="img-fluid rounded shadow-sm" style="max-height: 200px; width: 100%; object-fit: cover;">
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-bold"><i class="bi bi-eye-fill me-2"></i>Trạng thái</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="status" id="status1" value="1" checked>
+                                <label class="form-check-label" for="status1">Công khai ngay</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="status" id="status0" value="0">
+                                <label class="form-check-label" for="status0">Lưu bản nháp</label>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg fw-bold">
+                                <i class="bi bi-cloud-arrow-up-fill me-2"></i>ĐĂNG BÀI VIẾT
+                            </button>
+                            <button type="reset" class="btn btn-outline-secondary" onclick="resetPreview()">Làm mới Form</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
 
 <script>
     const imageInput = document.getElementById('imageInput');
@@ -109,3 +115,4 @@
     }
 </script>
 </body>
+</html>
