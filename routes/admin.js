@@ -187,15 +187,16 @@ router.get('/posts', (req, res) => {
 });
 
 // 2. Trang form thêm bài viết
+// SỬA LẠI ĐOẠN NÀY
 router.get('/posts/add', (req, res) => {
     db.query("SELECT * FROM categories", (err, categories) => {
         if (err) throw err;
+        // Chỉ render trang form, không redirect ở đây!
         res.render('admin/add_post', { 
             title: 'Thêm bài viết',
             categories: categories,
             layout: false 
         });
-        res.redirect('/admin/posts');
     });
 });
 
