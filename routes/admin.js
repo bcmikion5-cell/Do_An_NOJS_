@@ -174,7 +174,7 @@ router.get('/posts', (req, res) => {
         LEFT JOIN categories ON posts.category_id = categories.id 
         ORDER BY posts.id DESC
     `;
-    
+
     db.query(sql, (err, results) => {
         if (err) throw err;
         res.render('admin/posts', {
@@ -191,11 +191,10 @@ router.get('/posts', (req, res) => {
 router.get('/posts/add', (req, res) => {
     db.query("SELECT * FROM categories", (err, categories) => {
         if (err) throw err;
-        // Chỉ render trang form, không redirect ở đây!
-        res.render('admin/add_post', { 
+        res.render('admin/add_post', {
             title: 'Thêm bài viết',
             categories: categories,
-            layout: false 
+            layout: false
         });
     });
 });
@@ -204,7 +203,7 @@ router.get('/posts/add', (req, res) => {
 router.post('/posts/add', (req, res) => {
     const { title, content, image, category_id, status } = req.body;
     const sql = "INSERT INTO posts (title, content, image, category_id, status) VALUES (?, ?, ?, ?, ?)";
-    
+
     db.query(sql, [title, content, image, category_id, status || 1], (err) => {
         if (err) {
             console.error(err);

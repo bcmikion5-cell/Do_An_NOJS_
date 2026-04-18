@@ -30,14 +30,60 @@ router.get('/', (req, res) => {
     });
 });
 
-// Danh mục
+/// Danh mục & Tìm kiếm
 router.get('/category', (req, res) => {
-    return res.render('pages/category', {
-        title: 'Danh mục - BizNews',
-        categoryName: 'Kinh doanh'
+    const page = parseInt(req.query.page) || 1; 
+    const limit = 4; // Số lượng bài viết mỗi trang
+    const offset = (page - 1) * limit;
+    
+    const keyword = req.query.search || ""; // Nhận từ khóa từ name="search" trong form
+    const categoryId = req.query.id || ""; 
+
+    // Điều kiện lọc bài viết theo status và từ khóa/danh mục
+    let whereClause = "WHERE p.status = 1";
+    let params = [];
+
+    if (keyword) {
+        whereClause += " AND p.title LIKE ?";
+        params.push(`%${keyword}%`);
+    }
+    if (categoryId) {
+        whereClause += " AND p.category_id = ?";
+        params.push(categoryId);
+    }
+
+    // 1. Lấy tổng số lượng để hiển thị "Kết quả: X bài viết"
+    const countSql = `SELECT COUNT(*) as total FROM posts p ${whereClause}`;
+    
+    db.query(countSql, params, (err, countResult) => {
+        if (err) return res.send("Lỗi truy vấn đếm!");
+        const totalItems = countResult[0].total;
+        const totalPages = Math.ceil(totalItems / limit);
+
+        // 2. Lấy danh sách bài viết thực tế
+        const dataSql = `
+            SELECT p.*, c.name as CategoryName 
+            FROM posts p
+            LEFT JOIN categories c ON p.category_id = c.id 
+            ${whereClause} 
+            ORDER BY p.id DESC LIMIT ? OFFSET ?`;
+            
+        db.query(dataSql, [...params, limit, offset], (err, results) => {
+            if (err) return res.send("Lỗi lấy danh sách bài viết!");
+
+            // Trả về giao diện kèm theo biến 'total' bạn đang thiếu
+            res.render('pages/category', {
+                title: 'Kết quả tìm kiếm',
+                listTin: results,
+                total: totalItems, // Biến này dùng để hiện: Kết quả: <%= total %> bài viết
+                keyword: keyword,
+                categoryId: categoryId,
+                currentPage: page,
+                totalPages: totalPages
+            });
+        });
     });
 });
-
 // Chi tiết
 router.get('/single', (req, res) => {
     return res.render('pages/single', {
