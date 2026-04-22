@@ -1,25 +1,28 @@
-
 <%- include('partials/header_ad') %>
 
 <div class="card shadow-sm">
     <div class="card-body">
         <h2 class="card-title">Chào mừng đến với hệ thống quản trị</h2>
         <div class="row mt-4">
+            
             <div class="col-md-4">
                 <div class="card bg-primary text-white p-3 mb-3 text-center">
                     <h4>Bài viết</h4>
-                    <p class="h2">12</p> </div>
+                    <p class="h2"><%= thongKe.total_posts %></p> 
+                </div>
             </div>
+            
             <div class="col-md-4">
                 <div class="card bg-success text-white p-3 mb-3 text-center">
                     <h4>Danh mục</h4>
-                    <p class="h2">5</p>
+                    <p class="h2"><%= thongKe.total_categories %></p>
                 </div>
             </div>
+            
             <div class="col-md-4">
                 <div class="card bg-warning text-dark p-3 mb-3 text-center">
                     <h4>Liên hệ mới</h4>
-                    <p class="h2">3</p>
+                    <p class="h2"><%= thongKe.total_contacts %></p>
                 </div>
             </div>
             

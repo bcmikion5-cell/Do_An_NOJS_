@@ -3,6 +3,16 @@
 <div class="container-fluid">
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
         <h1 class="h2">Quản lý người dùng</h1>
+         <!-- Thêm user -->
+        <!-- <a href="/admin/add_users/add" 
+        class="btn btn-success " 
+        onclick="return confirm('Bạn có chắc chắn muốn Thêm người dùng này?')">Thêm</a> -->
+
+        <a href="/admin/users/add" class="btn btn-success fw-bold">
+    Thêm Người Dùng
+</a>
+
+
     </div>
 
     <div class="table-responsive">
@@ -12,7 +22,8 @@
                     <th>ID</th>
                     <th>Tên người dùng</th>
                     <th>Email</th>
-                    <th>Trạng thái</th>
+                    <th>Mật Khẩu</th>
+                    <th>Vai Trò</th>
                     <th>Thao tác</th>
                 </tr>
             </thead>
@@ -22,17 +33,70 @@
                     <td><%= user.id %></td>
                     <td><%= user.username %></td>
                     <td><%= user.email %></td>
+                    <td><%= user.password %></td>
+                    <td><%= user.vai_tro %></td>
                     <td>
-                        <span class="badge <%= user.status == 1 ? 'bg-success' : 'bg-danger' %>">
-                            <%= user.status == 1 ? 'Hoạt động' : 'Bị khóa' %>
-                        </span>
-                    </td>
-                    <td>
+                        <!-- Xoá user -->
                         <a href="/admin/users/delete/<%= user.id %>" 
-                           class="btn btn-sm btn-outline-danger" 
+                           class="btn btn-danger" 
                            onclick="return confirm('Bạn có chắc chắn muốn xóa người dùng này?')">Xóa</a>
+
+                        <!-- Sửa user -->
+                        <button type="button" class="btn btn-sm btn-warning me-2" data-bs-toggle="modal" data-bs-target="#editModal<%= user.id %>">Sửa</button>
+                    
+                        <!-- Reset mật khẩu -->
+                         <a href="/admin/users/reset/<%= user.id %>" 
+                           class="btn btn-danger" 
+                           onclick="return confirm('Bạn có chắc chắn muốn reset mật khẩu người dùng này?')">reset mật khẩu</a>
+
                     </td>
                 </tr>
+                <div class="modal fade" id="editModal<%= user.id %>">
+        <div class="modal-dialog">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h5 class="modal-title text-warning fw-bold">Chỉnh sửa người dùng</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <!-- giao diện thay đổi thông tin người dùng -->
+                <div class="modal-body text-start">
+                    <form action="/admin/users/edit/<%= user.id %>" method="POST">
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Họ và Tên</label>
+                            <input type="text" name="username" class="form-control" value="<%= user.username %>" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Email</label>
+                            <input type="email" name="email" class="form-control" value="<%= user.email %>" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Mật khẩu</label>
+                            <input type="text" name="password" class="form-control" value="<%= user.password %>" required>
+                        </div>
+
+                        
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Vai Trò</label>
+                            <input type="vai_tro" name="vai_tro" class="form-control" value="<%= user.vai_tro %>" required>
+                        </div>
+
+                        <div class="text-end mt-4">
+                            <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">Hủy</button>
+                            <button type="submit" class="btn btn-warning fw-bold text-dark">Lưu Thay Đổi</button>
+                        </div>
+
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </div>
                 <% }) %>
             </tbody>
         </table>

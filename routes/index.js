@@ -108,7 +108,9 @@ router.get('/contact', (req, res) => {
 // ================= LOGIN =================
 
 router.get('/login', (req, res) => {
-    return res.render('pages/login');
+    return res.render('pages/login', {
+        layout: false // <--- THÊM DÒNG NÀY ĐỂ TẮT GIAO DIỆN NGƯỜI DÙNG
+    });
 });
 
 router.get('/register', (req, res) => {
@@ -118,7 +120,7 @@ router.get('/register', (req, res) => {
 // Xử lý login (MYSQL)
 router.post('/login', (req, res) => {
     const { email, password } = req.body;
-    const sql = "SELECT * FROM users WHERE email=? AND password=?";
+    const sql = "SELECT * FROM users WHERE email=? AND password=? AND vai_tro = 'admin'";
     db.query(sql, [email, password], (err, result) => {
         if (err) {
             console.error(err);
@@ -136,7 +138,7 @@ router.post('/login', (req, res) => {
         } else {
             return res.send(`
                 <script>
-                    alert("Sai email hoặc mật khẩu ❌");
+                    alert("Sai email hoặc mật khẩu hoặc tài khoản không có quyền admin ❌");
                     window.location.href = "/login";
                 </script>
             `);

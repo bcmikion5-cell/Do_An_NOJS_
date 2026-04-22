@@ -2,12 +2,38 @@ const express = require('express');
 const router = express.Router();
 const db = require('../csdl/database');
 
-// Bảng điều khiển (Dashboard)
+// // Bảng điều khiển (Dashboard)
+// router.get('/dashboard', (req, res) => {
+//     if (!req.session.admin) return res.redirect('/login');
+//     res.render('admin/dashboard', {
+//         title: 'Bảng điều khiển - Admin BizNews',
+//         layout: false
+//     });
+// });
 router.get('/dashboard', (req, res) => {
-    if (!req.session.admin) return res.redirect('/login');
-    res.render('admin/dashboard', {
-        title: 'Bảng điều khiển - Admin BizNews',
-        layout: false
+    // Câu lệnh SQL đếm tổng số dòng của 3 bảng cùng lúc
+    // Lưu ý: Đổi chữ 'posts', 'categories', 'contacts' thành đúng tên bảng trong database của bạn
+    const sql = `
+        SELECT 
+            (SELECT COUNT(*) FROM posts) AS total_posts,
+            (SELECT COUNT(*) FROM categories) AS total_categories,
+            (SELECT COUNT(*) FROM contacts) AS total_contacts
+    `;
+
+    db.query(sql, (err, results) => {
+        if (err) {
+            console.error("Lỗi đếm dữ liệu:", err);
+            return res.send("Lỗi lấy dữ liệu thống kê!");
+        }
+
+        // results[0] sẽ chứa các con số đếm được
+        const thongKe = results[0];
+
+        // Gửi dữ liệu thongKe sang file giao diện
+        res.render('admin/dashboard', { 
+            layout: false, // (Nhớ giữ cái này nếu bạn đang dùng partials)
+            thongKe: thongKe 
+        });
     });
 });
 
@@ -15,7 +41,7 @@ router.get('/dashboard', (req, res) => {
 router.get('/users', (req, res) => {
     if (!req.session.admin) return res.redirect('/login');
 
-    const sql = "SELECT id, username, email FROM users ORDER BY id DESC";
+    const sql = "SELECT id, username, email, password, vai_tro FROM users ORDER BY id DESC";
     db.query(sql, (err, results) => {
         if (err) throw err;
         res.render('admin/users', {
@@ -39,6 +65,60 @@ router.get('/users/delete/:id', (req, res) => {
     });
 });
 
+//reset mật khẩu
+router.get('/users/reset/:id', (req, res) => {
+    const id = req.params.id;
+
+    const sql = "UPDATE users SET password = 1 WHERE id = ?";
+    db.query(sql, [id], (err) => {
+        if (err) throw err;
+        res.redirect('/admin/users');
+
+    });
+});
+
+// 1. HIỂN THỊ FORM THÊM USER
+// ==========================================
+// HIỂN THỊ FORM THÊM USER
+router.get('/users/add', (req, res) => {
+    return res.render('admin/add_users', {
+        layout: false // <--- THÊM DÒNG NÀY ĐỂ TẮT GIAO DIỆN NGƯỜI DÙNG
+    });
+});
+// ==========================================
+// 2. XỬ LÝ LƯU USER VÀO DATABASE
+// ==========================================
+router.post('/users/add', (req, res) => {
+    // Gán vai_tro mặc định là 0 nếu form không gửi lên
+    const { username, email, password, vai_tro } = req.body;
+
+    const sql = "INSERT INTO `users` (`username`, `email`, `password`, `vai_tro`) VALUES (?, ?, ?, ?)";
+    
+    db.query(sql, [username, email, password, vai_tro], (err, result) => {
+        if (err) {
+            console.error("Lỗi insert DB:", err);
+            return res.send("❌ Lỗi thêm User!");
+        }
+        res.redirect('/admin/users'); // Thành công thì quay lại trang danh sách
+    });
+});
+
+
+router.post('/users/edit/:id', (req, res) => {
+    const userId = req.params.id;
+    const { username, email, password, vai_tro } = req.body;
+
+    const sql = "UPDATE users SET username = ?, email = ?, password = ?, vai_tro = ? WHERE id = ?";
+    
+    db.query(sql, [username, email, password, vai_tro, userId], (err, result) => {
+        if (err) {
+            console.error("Lỗi cập nhật:", err);
+            return res.send("❌ Lỗi không thể cập nhật User!");
+        }
+        // Lưu xong thì tải lại trang danh sách (Modal sẽ tự động đóng)
+        res.redirect('/admin/users');
+    });
+});
 //---------------- 1. QUẢN LÝ DANH MỤC ----------------
 
 // Hiển thị danh sách danh mục
@@ -114,43 +194,6 @@ router.post('/categories/update/:id', (req, res) => {
     });
 });
 
-// // ---------------- 2. QUẢN LÝ BÀI VIẾT ----------------
-
-// // Hiển thị danh sách bài viết
-// app.get('/admin/posts', (req, res) => {
-//     // Dùng LEFT JOIN để lấy tên danh mục hiển thị cùng bài viết
-//     const sql = `
-//         SELECT posts.*, categories.name AS category_name 
-//         FROM posts 
-//         LEFT JOIN categories ON posts.category_id = categories.id 
-//         ORDER BY posts.id DESC
-//     `;
-
-//     db.query(sql, (err, posts) => {
-//         if (err) {
-//             console.error(err);
-//             return res.send("❌ Lỗi tải danh sách bài viết!");
-//         }
-//         res.render('admin/posts', {
-//             title: 'Quản lý bài viết - Admin',
-//             posts: posts
-//         });
-//     });
-// });
-
-// // Xóa bài viết
-// app.get('/admin/posts/delete/:id', (req, res) => {
-//     const id = req.params.id;
-
-//     const sql = "DELETE FROM posts WHERE id = ?";
-//     db.query(sql, [id], (err, result) => {
-//         if (err) {
-//             console.error(err);
-//             return res.send("❌ Lỗi xóa bài viết!");
-//         }
-//         res.redirect('/admin/posts');
-//     });
-// });
 
 
 // Route Đăng xuất

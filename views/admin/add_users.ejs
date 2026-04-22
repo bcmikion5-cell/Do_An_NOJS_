@@ -1,0 +1,33 @@
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<div class="container-fluid mt-4">
+    <form action="/admin/users/add" method="POST" class="border border-2 rounded p-4 m-4 w-50 mx-auto bg-white shadow-sm">
+        <h3 class="text-center mb-4 text-primary text-uppercase fw-bold">Thêm Người Dùng Mới</h3>
+
+        <div class="mb-3 mt-3">
+            <label class="form-label fw-bold">Họ và Tên (Username) *</label>
+            <input type="text" class="form-control" name="username" placeholder="Nhập tên người dùng" required>
+        </div>
+
+        <div class="mb-3 mt-3">
+            <label class="form-label fw-bold">Email *</label>
+            <input type="email" class="form-control" name="email" placeholder="Nhập địa chỉ email" required>
+        </div>
+
+        <div class="mb-3 mt-3">
+            <label class="form-label fw-bold">Mật khẩu (Password) *</label>
+            <input type="password" class="form-control" name="password" placeholder="Nhập mật khẩu" required>
+        </div>
+
+        <div class="mb-3 mt-3">
+            <label class="form-label fw-bold">Vai Trò</label>
+            <input type="text" class="form-control" name="vai_tro" placeholder="Nhập vai trò" required>
+        </div>
+
+        <div class="d-flex justify-content-center gap-3"> 
+            <button type="submit" class="btn btn-primary px-4 fw-bold">Thêm mới</button>
+            <a href="/admin/users" class="btn btn-outline-secondary px-4 fw-bold">Quay lại</a>
+        </div>
+    </form>
+</div>
+
