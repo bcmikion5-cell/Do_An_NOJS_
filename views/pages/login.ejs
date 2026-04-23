@@ -1,24 +1,27 @@
 <%- include('../partials/head') %>
 
-<div class="d-flex justify-content-center align-items-center vh-100">
-    <form action="/login" method="POST" 
-          class="was-validated border border-5 rounded p-4 w-50">
+<link href="/css/login.css" rel="stylesheet">
+
+
+<div class="login-page">
+    <form action="/login" method="POST" class="login-box">
+
+        <h2>Đăng Nhập</h2>
+    
 
         <div class="form-floating mb-3">
             <input type="email" class="form-control" name="email" placeholder="Email" required>
             <label>Email</label>
         </div>
 
-        <div class="form-floating mb-3">
+        <div class="form-floating mb-4">
             <input type="password" class="form-control" name="password" placeholder="Password" required>
-            <label>Password</label>
+            <label>Mật khẩu</label>
         </div>
 
-        <div class="d-flex justify-content-center gap-3"> 
-            <button type="submit" class="btn btn-primary px-4">
-                Đăng Nhập
-            </button>
-        </div>
+        <button type="submit" class="btn-login">Đăng Nhập</button>
+
+        <a href="/" class="btn-home">Quay lại trang chủ</a>
 
     </form>
-</div>  
+</div>
