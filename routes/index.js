@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../csdl/database');
-
+const bcrypt = require('bcrypt');//mã hoá mật khẩu
 // ================= ROUTES =================
 
 // Trang chủ
@@ -120,22 +120,45 @@ router.get('/register', (req, res) => {
 // Xử lý login (MYSQL)
 router.post('/login', (req, res) => {
     const { email, password } = req.body;
-    const sql = "SELECT * FROM users WHERE email=? AND password=? AND vai_tro = 'admin'";
-    db.query(sql, [email, password], (err, result) => {
+    
+    // BƯỚC 1: Bỏ check password ở đây đi. Chỉ tìm bằng email và vai_tro thôi
+    const sql = "SELECT * FROM users WHERE email=? AND vai_tro = 'admin'";
+    
+    // Chỉ truyền [email] vào câu SQL
+    db.query(sql, [email], (err, result) => {
         if (err) {
             console.error(err);
             return res.send("❌ Lỗi server!");
         }
 
+        // BƯỚC 2: Kiểm tra xem có tìm thấy tài khoản không
         if (result.length > 0) {
-            req.session.admin = result[0];
-            return res.send(`
-                <script>
-                    alert("Đăng nhập thành công ✅");
-                    window.location.href = "/admin/dashboard";
-                </script>
-            `);
+            const user = result[0]; // Thông tin tài khoản lấy từ DB
+            
+            // BƯỚC 3: DÙNG BCRYPT ĐỂ SO SÁNH MẬT KHẨU
+            // Nó sẽ tự lấy 'password' khách nhập, mã hóa, rồi đem so với 'user.password' trong DB
+            const isMatch = bcrypt.compareSync(password, user.password);
+            
+            if (isMatch) {
+                // ĐÚNG MẬT KHẨU
+                req.session.admin = user;
+                return res.send(`
+                    <script>
+                        alert("Đăng nhập thành công ✅");
+                        window.location.href = "/admin/dashboard";
+                    </script>
+                `);
+            } else {
+                // TÌM THẤY EMAIL NHƯNG SAI MẬT KHẨU
+                return res.send(`
+                    <script>
+                        alert("Sai email hoặc mật khẩu ❌");
+                        window.location.href = "/login";
+                    </script>
+                `);
+            }
         } else {
+            // KHÔNG TÌM THẤY EMAIL NÀY TRONG HỆ THỐNG HOẶC KHÔNG PHẢI ADMIN
             return res.send(`
                 <script>
                     alert("Sai email hoặc mật khẩu hoặc tài khoản không có quyền admin ❌");
@@ -146,33 +169,7 @@ router.post('/login', (req, res) => {
     });
 });
 
-//Xử lý đăng ký
-router.post('/register', (req, res) => {
-    const { username, email, password } = req.body;
-    const sql = "INSERT INTO `users` (`username`, `email`, `password`) VALUES (?,?,?)";
-    db.query(sql, [username, email, password], (err, result) => {
-        if (err) {
-            console.error(err);
-            return res.send("❌ Lỗi server!");
-        }
 
-        if (result.affectedRows > 0) {
-            return res.send(`
-                <script>
-                    alert("Đăng ký thành công ✅");
-                    window.location.href = "/login";
-                </script>
-            `);
-        } else {
-            return res.send(`
-                <script>
-                    alert("Đăng ký thất bại ❌");
-                    window.location.href = "/login";
-                </script>
-            `);
-        }
-    });
-});
 
 // 1. TRANG HIỂN THỊ CHI TIẾT BÀI VIẾT & BÌNH LUẬN
 router.get('/single/:id', (req, res) => {
@@ -231,6 +228,7 @@ router.post('/comment', (req, res) => {
     });
 });
 
+
 // ================= QUẢN LÝ BÀI VIẾT (ADMIN) =================
 router.get('/admin/posts', (req, res) => {
     const sql = `SELECT posts.*, categories.name as category_name 
@@ -249,6 +247,54 @@ router.get('/admin/posts', (req, res) => {
             posts: results ,
             layout: false
         });
+    });
+});
+
+
+//=============Trang Liên Hệ=================
+router.post('/contact', (req, res) => {
+    // 1. Lấy dữ liệu với đúng tên cột: title và content
+    const { name, email, phone, title, content } = req.body;
+    
+    // 2. Chèn vào database theo đúng cấu trúc bảng của bạn
+    const sql = "INSERT INTO contacts (name, email, phone, title, content) VALUES (?, ?, ?, ?, ?)";
+    
+    db.query(sql, [name, email, phone, title, content], (err, result) => {
+        if (err) {
+            console.error("Lỗi khi lưu thông tin liên hệ:", err);
+            return res.send("❌ Đã có lỗi xảy ra, không thể gửi tin nhắn của bạn lúc này.");
+        }
+       
+        else {
+        // Gửi thành công: Bật alert xong rồi dùng JS để tải lại trang
+        res.send(`
+            <script>
+                alert("Gửi tin nhắn thành công ✅");
+                window.location.href = "/contact"; 
+            </script>
+        `);
+    }
+    });
+});
+
+
+// 2. XỬ LÝ LƯU Đăng ký VÀO DATABASE
+router.post('/dangky', (req, res) => {
+    const { email } = req.body;
+    const sqlInsert = "INSERT INTO subscribers (email) VALUES (?)";
+    
+    db.query(sqlInsert, [email], (err, result) => {
+        if (err) {
+            console.error("Lỗi lưu đăng ký:", err);
+            return res.send("Lỗi: Không thể đăng ký.");
+        } else {
+            res.send(`
+            <script>
+                alert("Đăng ký thành công ✅");
+                window.history.back();
+            </script>
+        `);
+        }
     });
 });
 

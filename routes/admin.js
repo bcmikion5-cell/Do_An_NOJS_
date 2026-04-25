@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../csdl/database');
+const bcrypt = require('bcrypt');//mã hoá mật khẩu
 
 // // Bảng điều khiển (Dashboard)
 // router.get('/dashboard', (req, res) => {
@@ -92,9 +93,11 @@ router.post('/users/add', (req, res) => {
     // Gán vai_tro mặc định là 0 nếu form không gửi lên
     const { username, email, password, vai_tro } = req.body;
 
+    const mahoaPassword = bcrypt.hashSync(password, 10);
+
     const sql = "INSERT INTO `users` (`username`, `email`, `password`, `vai_tro`) VALUES (?, ?, ?, ?)";
     
-    db.query(sql, [username, email, password, vai_tro], (err, result) => {
+    db.query(sql, [username, email, mahoaPassword, vai_tro], (err, result) => {
         if (err) {
             console.error("Lỗi insert DB:", err);
             return res.send("❌ Lỗi thêm User!");
