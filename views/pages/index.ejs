@@ -1,89 +1,95 @@
-
-
 <div class="container mt-4">
-    
+
     <div class="mb-3 border-bottom pb-2">
         <h3 class="text-danger text-uppercase">Tin Tức Mới Nhất</h3>
     </div>
-    
+
     <div class="row">
-        <% if(typeof latestPosts !== 'undefined' && latestPosts.length > 0) { %>
-            <% latestPosts.forEach(post => { %>
+        <% if(typeof latestPosts !=='undefined' && latestPosts.length> 0) { %>
+            <% latestPosts.forEach(post=> { %>
                 <div class="col-md-4 mb-4">
                     <div class="card h-100 shadow-sm">
-                        <img src="/img/<%= post.image %>" class="card-img-top" alt="<%= post.title %>" style="height: 200px; object-fit: cover;">
-                        
+                        <img src="/img/<%= post.image %>" class="card-img-top" alt="<%= post.title %>"
+                            style="height: 200px; object-fit: cover;">
+
                         <div class="card-body">
                             <h5 class="card-title">
-                                <a href="/single/<%= post.id %>" class="text-dark text-decoration-none fw-bold"><%= post.title %></a>
+                                <a href="/single/<%= post.id %>" class="text-dark text-decoration-none fw-bold">
+                                    <%= post.title %>
+                                </a>
                             </h5>
-                            
+
                             <p class="text-muted small mb-2">
                                 📅 <%= new Date(post.ngaydang).toLocaleDateString('vi-VN') %>
                             </p>
 
-                            <p class="card-text"><%= post.summary %></p>
+                            <p class="card-text">
+                                <%= post.summary %>
+                            </p>
                         </div>
                     </div>
                 </div>
-            <% }) %>
-        <% } else { %>
-            <div class="col-12"><p>Chưa có tin tức mới nào.</p></div>
-        <% } %>
+                <% }) %>
+                    <% } else { %>
+                        <div class="col-12">
+                            <p>Chưa có tin tức mới nào.</p>
+                        </div>
+                        <% } %>
     </div>
 
     <div class="mb-3 mt-5 border-bottom pb-2">
-        <h3 class="text-primary text-uppercase">Xem Nhiều Nhất</h3>
-    </div>
+    <h3 class="text-primary text-uppercase">Xem Nhiều Nhất</h3>
+</div>
 
-    
-    <% if(typeof trendingPosts !== 'undefined' && trendingPosts.length > 0) { %>
+<div class="row">
+    <% if(typeof trendingPosts !=='undefined' && trendingPosts.length > 0) { %>
         <% trendingPosts.forEach(post => { %>
-            <div class="col-md-10 mb-8">
-                <div class="card h-100 shadow-sm">
-<a href="/single/<%= post.id %>" >
-                    <!-- Ảnh -->
-                    <img src="/img/<%= post.image %>" 
-                         class="card-img-top" 
-                         alt="<%= post.title %>">
-</a>
-                    <!-- Nội dung -->
-                    <div class="card-body">
-                        <a href="/single/<%= post.id %>" 
-                           class="badge text-primary d-inline-block">
-                            <%= post.title %>
-                        </a>
-
-                        <p class="text-muted small mb-2">
-                            <a href="/single/<%= post.id %>" >
-                            <%= new Date(post.ngaydang).toLocaleDateString('vi-VN') %>
+            <div class="col-12 mb-3"> <div class="card h-100 shadow-sm border-0">
+                    <div class="row g-0 align-items-center">
+                        <div class="col-4 col-md-3">
+                            <a href="/single/<%= post.id %>">
+                                <img src="/img/<%= post.image %>" 
+                                     class="img-fluid rounded-start" 
+                                     alt="<%= post.title %>"
+                                     style="height: 120px; width: 100%; object-fit: cover;">
                             </a>
-                        </p>
-<a href="/single/<%= post.id %>" >
-                        <p class="card-text h5"><%= post.summary %></p>
-</a>
- <a href="/single/<%= post.id %>" >
-                          <p class="card-text small"><%= post.content %></p>
-</a> 
-                        <hr>
+                        </div>
+                        
+                        <div class="col-8 col-md-9">
+                            <div class="card-body py-2 px-3">
+                                <a href="/single/<%= post.id %>" class="text-decoration-none">
+                                    <h6 class="card-title text-primary mb-1 text-truncate-2">
+                                        <%= post.title %>
+                                    </h6>
+                                </a>
 
-                        <small class="me-3">
-                            👁 <%= post.views %>
-                        </small>
-                        <small>
-                         <a href="/single/<%= post.id %>" >
-                            💬 <%= post.comment %>
-                            </a>    
-                        </small>
-                            
+                                <p class="text-muted small mb-1" style="font-size: 0.8rem;">
+                                    <%= new Date(post.ngaydang).toLocaleDateString('vi-VN') %>
+                                </p>
+
+                                <p class="card-text small text-secondary mb-2 d-none d-md-block text-truncate">
+                                    <%= post.summary %>
+                                </p>
+
+                                <div class="d-flex align-items-center mt-auto">
+                                    <small class="me-3 text-muted">
+                                        👁 <%= post.views %>
+                                    </small>
+                                    <small class="text-muted">
+                                        <a href="/single/<%= post.id %>" class="text-decoration-none text-muted">
+                                            💬 <%= post.comment %>
+                                        </a>
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-
                 </div>
             </div>
         <% }) %>
     <% } else { %>
-        <div class="col-12"><p>Chưa có tin tức xem nhiều.</p></div>
+        <div class="col-12">
+            <p class="text-center text-muted">Chưa có tin tức xem nhiều.</p>
+        </div>
     <% } %>
-
-
 </div>
