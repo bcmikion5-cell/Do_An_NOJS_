@@ -3,17 +3,9 @@ const router = express.Router();
 const db = require('../csdl/database');
 const bcrypt = require('bcrypt');//mã hoá mật khẩu
 
-// // Bảng điều khiển (Dashboard)
-// router.get('/dashboard', (req, res) => {
-//     if (!req.session.admin) return res.redirect('/login');
-//     res.render('admin/dashboard', {
-//         title: 'Bảng điều khiển - Admin BizNews',
-//         layout: false
-//     });
-// });
+
 router.get('/dashboard', (req, res) => {
-    // Câu lệnh SQL đếm tổng số dòng của 3 bảng cùng lúc
-    // Lưu ý: Đổi chữ 'posts', 'categories', 'contacts' thành đúng tên bảng trong database của bạn
+
     const sql = `
         SELECT 
             (SELECT COUNT(*) FROM posts) AS total_posts,
@@ -69,9 +61,10 @@ router.get('/users/delete/:id', (req, res) => {
 //reset mật khẩu
 router.get('/users/reset/:id', (req, res) => {
     const id = req.params.id;
+        const mahoaPassword = bcrypt.hashSync("1", 10);
 
-    const sql = "UPDATE users SET password = 1 WHERE id = ?";
-    db.query(sql, [id], (err) => {
+    const sql = "UPDATE users SET password = ? WHERE id = ?";
+    db.query(sql, [mahoaPassword, id], (err) => {
         if (err) throw err;
         res.redirect('/admin/users');
 
@@ -111,9 +104,12 @@ router.post('/users/edit/:id', (req, res) => {
     const userId = req.params.id;
     const { username, email, password, vai_tro } = req.body;
 
+        const mahoaPassword = bcrypt.hashSync(password, 10);
+
+
     const sql = "UPDATE users SET username = ?, email = ?, password = ?, vai_tro = ? WHERE id = ?";
     
-    db.query(sql, [username, email, password, vai_tro, userId], (err, result) => {
+    db.query(sql, [username, email, mahoaPassword, vai_tro, userId], (err, result) => {
         if (err) {
             console.error("Lỗi cập nhật:", err);
             return res.send("❌ Lỗi không thể cập nhật User!");
