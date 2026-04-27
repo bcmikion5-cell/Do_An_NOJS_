@@ -270,5 +270,83 @@ router.get('/posts/delete/:id', (req, res) => {
     });
 });
 
+// ---------------- 2. QUẢN LÝ NEWLETTER ----------------
+router.get('/subscribers', (req, res) => {
+    if (!req.session.admin) return res.redirect('/login');
+
+    const sql = "SELECT * FROM subscribers ORDER BY id DESC";
+    db.query(sql, (err, results) => {
+        if (err) throw err;
+
+        res.render('admin/subscribers', {
+            title: 'Quản lý newsletter',
+            subscribers: results,
+            adminName: req.session.admin.username,
+            layout: false
+        });
+    });
+});
+//---------------------------------------------------------
+// ---------------- 2. QUẢN LÝ Liên hệ ----------------
+router.get('/contacts', (req, res) => {
+    if (!req.session.admin) return res.redirect('/login');
+
+    const sql = "SELECT * FROM contacts ORDER BY id DESC";
+    db.query(sql, (err, results) => {
+        if (err) throw err;
+
+        res.render('admin/contacts', {
+            title: 'Quản lý Liên hệ',
+            contacts: results,
+            adminName: req.session.admin.username,
+            layout: false
+        });
+    });
+});
+
+router.post('/contact', (req, res) => {
+    const { name, email, phone, title, content } = req.body;
+
+    if (!name || !email || !phone || !title || !content) {
+        return res.send('Vui lòng nhập đầy đủ thông tin');
+    }
+
+    const sql = `
+        INSERT INTO contacts (name, email, phone, title, content, status)
+        VALUES (?, ?, ?, ?, ?, ?)
+    `;
+
+    db.query(sql, [name, email, phone, title, content, 0], (err, result) => {
+        if (err) {
+            console.log(err);
+            return res.send('Lỗi khi lưu liên hệ');
+        }
+
+        res.redirect('/contact?success=1');
+    });
+});
+
+router.get('/contacts/approve/:id', (req, res) => {
+    const id = req.params.id;
+
+    const sql = "UPDATE contacts SET status = 1 WHERE id = ?";
+
+    db.query(sql, [id], (err) => {
+        if (err) throw err;
+        res.redirect('/admin/contacts');
+    });
+});
+
+router.get('/contacts/unapprove/:id', (req, res) => {
+    const id = req.params.id;
+
+    const sql = "UPDATE contacts SET status = 0 WHERE id = ?";
+
+    db.query(sql, [id], (err) => {
+        if (err) throw err;
+        res.redirect('/admin/contacts');
+    });
+});
+//---------------------------------------------------------
 
 module.exports = router;
