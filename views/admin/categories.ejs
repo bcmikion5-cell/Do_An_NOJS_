@@ -60,7 +60,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <% categories.forEach(cate=> { %>
+                        <% categories.forEach(cate=> { %>
                         <tr>
                             <td>
                                 <%= cate.id %>
@@ -80,9 +80,15 @@
                                 <a href="/admin/categories/delete/<%= cate.id %>" class="btn btn-sm btn-outline-danger"
                                     onclick="return confirm('Bạn có chắc chắn muốn xóa danh mục này?')">🗑️Xóa</a>
 
-                                <button type="button" class="btn btn-sm btn-warning"
-                                    onclick='openEditModal(<%= cate.id %>, <%- JSON.stringify(cate.name) %>, <%- JSON.stringify(cate.description) %>, <%= cate.status %>)'>
-                                    ✏️Sửa</button>
+                                <button 
+                                    type="button" 
+                                    class="btn btn-sm btn-warning edit-btn"
+                                    data-id="<%= cate.id %>"
+                                    data-name="<%= cate.name %>"
+                                    data-desc="<%= cate.description %>"
+                                    data-status="<%= cate.status %>">
+                                    ✏️Sửa
+                                </button>
                             </td>
                         </tr>
                         <% }) %>
@@ -118,16 +124,23 @@
         </div>
     </div>
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            window.openEditModal = function (id, name, description, status) {
-                document.getElementById('editName').value = name;
-                document.getElementById('editDesc').value = description;
-                document.getElementById('editStatus').value = status;
+            document.addEventListener("DOMContentLoaded", function () {
+            document.querySelectorAll('.edit-btn').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    const id = this.dataset.id;
+                    const name = this.dataset.name;
+                    const description = this.dataset.desc;
+                    const status = this.dataset.status;
 
-                document.getElementById('editForm').action = '/admin/categories/update/' + id;
+                    document.getElementById('editName').value = name;
+                    document.getElementById('editDesc').value = description || '';
+                    document.getElementById('editStatus').value = status;
 
-                new bootstrap.Modal(document.getElementById('editModal')).show();
-            }
-        });
+                    document.getElementById('editForm').action = '/admin/categories/update/' + id;
+
+                    new bootstrap.Modal(document.getElementById('editModal')).show();
+                    });
+                });
+            });
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
