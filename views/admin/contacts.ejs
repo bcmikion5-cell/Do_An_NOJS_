@@ -1,0 +1,54 @@
+<%- include('./partials/header_ad') %>
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">Quản lý Liên hệ</h1>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-striped table-sm">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Email liên hệ</th>
+                    <th>Tên người liên hệ</th>
+                    <th>Số điện thoại</th>
+                    <th>Tiêu đề liên hệ</th>
+                    <th>Nội dung liên hệ</th>
+                    <th>Trạng thái</th>
+                    <th>Hành động</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% contacts.forEach(ct => { %>
+                <tr>
+                    <td><%= ct.id %></td>
+                    <td><%= ct.email %></td>
+                    <td><%= ct.name %></td>
+                    <td><%= ct.phone %></td>
+                    <td><%= ct.title %></td>
+                    <td><%= ct.content %></td>
+                    <td>
+                        <span class="badge <%= ct.status == 1 ? 'bg-success' : 'bg-danger' %>">
+                                    <%= ct.status==1 ? 'Đã duyệt' : 'Chưa duyệt' %>
+                        </span>
+                    </td>
+                    <td>
+                        <% if (ct.status == 0) { %>
+                            <a href="/admin/contacts/approve/<%= ct.id %>" 
+                                class="btn btn-sm btn-success"
+                                onclick="return confirm('Duyệt liên hệ này?')">
+                                ✔️ Duyệt
+                        </a>
+                        <% } else { %>
+                            <a href="/admin/contacts/unapprove/<%= ct.id %>" class="btn btn-sm btn-warning">❌ Hủy duyệt </a>
+                        <% } %>
+                    </td>
+                </tr>
+                <% }) %>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<%- include('./partials/footer_ad') %>
