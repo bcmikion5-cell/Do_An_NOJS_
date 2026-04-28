@@ -4,32 +4,6 @@ const db = require('../csdl/database');
 const bcrypt = require('bcrypt');//mã hoá mật khẩu
 // ================= ROUTES =================
 
-// Trang chủ
-// router.get('/', (req, res) => {
-//     const sqlLatest = "SELECT * FROM posts WHERE status = 1 ORDER BY id DESC LIMIT 6";
-//     const sqlTrending = "SELECT * FROM posts WHERE status = 1 ORDER BY views DESC LIMIT 6";
-
-//     db.query(sqlLatest, (err, latestPosts) => {
-//         if (err) {
-//             console.error("Lỗi truy vấn mới nhất:", err);
-//             return res.send("Lỗi cơ sở dữ liệu!");
-//         }
-
-//         db.query(sqlTrending, (err, trendingPosts) => {
-//             if (err) {
-//                 console.error("Lỗi truy vấn trending:", err);
-//                 return res.send("Lỗi cơ sở dữ liệu!");
-//             }
-
-//             return res.render('pages/index', { 
-//                 title: 'Trang chủ - BizNews',
-//                 latestPosts: latestPosts,
-//                 trendingPosts: trendingPosts
-//             });
-//         });
-//     });
-// });
-
 // Trang chủ (Cách viết không dùng async/await)
 router.get('/', (req, res) => {
     const sqlLatest = "SELECT * FROM posts WHERE status = 1 ORDER BY id DESC LIMIT 6";
@@ -308,7 +282,9 @@ router.get('/admin/posts', (req, res) => {
             return res.status(500).send("Lỗi hệ thống!");
         }
         
-        return res.render('admin/posts', { 
+        // CHỖ SỬA: Đổi từ 'admin/posts' thành 'admin/posts/posts' 
+        // để Express tìm đúng file views/admin/posts/posts.ejs của bạn
+        return res.render('admin/posts/posts', { 
             title: 'Quản lý bài viết - Admin',
             posts: results ,
             layout: false

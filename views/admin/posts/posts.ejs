@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Quản lý bài viết</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .post-title {
+            display: -webkit-box;
+            -webkit-line-clamp: 1;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            max-width: 300px;
+        }
+        .post-content {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            font-size: 0.85rem;
+            color: #6c757d;
+            max-width: 400px;
+        }
+        .img-preview {
+            width: 80px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 6px;
+            transition: transform 0.2s;
+        }
+        .img-preview:hover {
+            transform: scale(1.1);
+        }
+        .table-hover tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+    </style>
+</head>
+<body class="bg-light">
+
+    <div class="container bg-white mt-5 p-4 shadow-sm rounded border">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div class="d-flex align-items-center">
+                <a href="/admin/dashboard" class="btn btn-outline-secondary me-3 shadow-sm" title="Quay lại Dashboard">
+                    <i class="bi bi-arrow-left"></i> Quay lại
+                </a>
+                <h2 class="text-primary fw-bold mb-0"><i class="bi bi-newspaper"></i> Quản lý bài viết</h2>
+            </div>
+            
+            <a href="/admin/posts/add" class="btn btn-success px-4 shadow-sm">
+                <i class="bi bi-plus-circle"></i> Thêm bài viết mới
+            </a>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th style="width: 50px;" class="text-center">ID</th>
+                        <th style="width: 100px;">Ảnh</th>
+                        <th>Tiêu đề & Nội dung</th>
+                        <th style="width: 150px;">Danh mục</th>
+                        <th style="width: 120px;" class="text-center">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (posts && posts.length > 0) { %>
+                        <% posts.forEach(post => { %>
+                        <tr>
+                            <td class="text-center text-muted fw-bold">#<%= post.id %></td>
+                            <td>
+                                <img src="<%= post.image %>" 
+                                     onerror="this.src='https://via.placeholder.com/80x60?text=No+Image'" 
+                                     class="img-preview border shadow-sm">
+                            </td>
+                            <td>
+                                <div class="fw-bold text-dark post-title" title="<%= post.title %>">
+                                    <%= post.title %>
+                                </div>
+                                <div class="post-content">
+                                    <%= post.content %>
+                                </div>
+                            </td>
+                            <td>
+                                <% if (post.category_name) { %>
+                                    <span class="badge bg-info text-dark shadow-sm">
+                                        <i class="bi bi-tag-fill me-1"></i><%= post.category_name %>
+                                    </span>
+                                <% } else { %>
+                                    <span class="badge bg-secondary opacity-75">
+                                        <i class="bi bi-patch-question"></i> Chưa phân loại
+                                    </span>
+                                <% } %>
+                            </td>
+                            <td class="text-center">
+                                <div class="btn-group shadow-sm">
+                                    <a href="/admin/posts/edit/<%= post.id %>" class="btn btn-sm btn-outline-primary" title="Chỉnh sửa bài viết">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <a href="/admin/posts/delete/<%= post.id %>" 
+                                       class="btn btn-sm btn-outline-danger" 
+                                       onclick="return confirm('⚠️ Bạn có chắc chắn muốn xóa bài viết: <%= post.title %>?')" title="Xóa bài viết">
+                                        <i class="bi bi-trash"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        <% }) %>
+                    <% } else { %>
+                        <tr>
+                            <td colspan="5" class="text-center text-muted py-5">
+                                <i class="bi bi-inbox fs-2 d-block mb-2"></i>
+                                Chưa có bài viết nào được đăng.
+                            </td>
+                        </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

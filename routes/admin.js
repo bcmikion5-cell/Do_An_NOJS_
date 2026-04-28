@@ -37,7 +37,8 @@ router.get('/users', (req, res) => {
     const sql = "SELECT id, username, email, password, vai_tro FROM users ORDER BY id DESC";
     db.query(sql, (err, results) => {
         if (err) throw err;
-        res.render('admin/users', {
+        // ĐÃ SỬA: admin/users -> admin/users/users
+        res.render('admin/users/users', {
             title: 'Quản lý người dùng',
             users: results,
             adminName: req.session.admin.username,
@@ -72,22 +73,16 @@ router.get('/users/reset/:id', (req, res) => {
 });
 
 // 1. HIỂN THỊ FORM THÊM USER
-// ==========================================
-// HIỂN THỊ FORM THÊM USER
 router.get('/users/add', (req, res) => {
-    return res.render('admin/add_users', {
-        layout: false // <--- THÊM DÒNG NÀY ĐỂ TẮT GIAO DIỆN NGƯỜI DÙNG
+    return res.render('admin/users/add_users', {
+        layout: false 
     });
 });
-// ==========================================
+
 // 2. XỬ LÝ LƯU USER VÀO DATABASE
-// ==========================================
 router.post('/users/add', (req, res) => {
-    // Gán vai_tro mặc định là 0 nếu form không gửi lên
     const { username, email, password, vai_tro } = req.body;
-
     const mahoaPassword = bcrypt.hashSync(password, 10);
-
     const sql = "INSERT INTO `users` (`username`, `email`, `password`, `vai_tro`) VALUES (?, ?, ?, ?)";
     
     db.query(sql, [username, email, mahoaPassword, vai_tro], (err, result) => {
@@ -95,7 +90,7 @@ router.post('/users/add', (req, res) => {
             console.error("Lỗi insert DB:", err);
             return res.send("❌ Lỗi thêm User!");
         }
-        res.redirect('/admin/users'); // Thành công thì quay lại trang danh sách
+        res.redirect('/admin/users'); 
     });
 });
 
@@ -103,9 +98,7 @@ router.post('/users/add', (req, res) => {
 router.post('/users/edit/:id', (req, res) => {
     const userId = req.params.id;
     const { username, email, password, vai_tro } = req.body;
-
-        const mahoaPassword = bcrypt.hashSync(password, 10);
-
+    const mahoaPassword = bcrypt.hashSync(password, 10);
 
     const sql = "UPDATE users SET username = ?, email = ?, password = ?, vai_tro = ? WHERE id = ?";
     
@@ -114,10 +107,10 @@ router.post('/users/edit/:id', (req, res) => {
             console.error("Lỗi cập nhật:", err);
             return res.send("❌ Lỗi không thể cập nhật User!");
         }
-        // Lưu xong thì tải lại trang danh sách (Modal sẽ tự động đóng)
         res.redirect('/admin/users');
     });
 });
+
 //---------------- 1. QUẢN LÝ DANH MỤC ----------------
 
 // Hiển thị danh sách danh mục
@@ -147,7 +140,7 @@ router.post('/categories/add', (req, res) => {
             console.error(err);
             return res.send("❌ Lỗi thêm danh mục!");
         }
-        res.redirect('/admin/categories'); // Thành công thì quay lại trang danh sách
+        res.redirect('/admin/categories'); 
     });
 });
 
@@ -200,11 +193,8 @@ router.get('/logout', (req, res) => {
     req.session.destroy();
     res.redirect('/login');
 });
-// Giả sử API của bạn trả về danh sách bài viết
-// ---------------- 2. QUẢN LÝ BÀI VIẾT ----------------
 
-// Hiển thị danh sách bài viết
-// --- QUẢN LÝ BÀI VIẾT ---
+// ---------------- 2. QUẢN LÝ BÀI VIẾT ----------------
 
 // 1. Trang danh sách bài viết
 router.get('/posts', (req, res) => {
@@ -219,7 +209,7 @@ router.get('/posts', (req, res) => {
 
     db.query(sql, (err, results) => {
         if (err) throw err;
-        res.render('admin/posts', {
+        res.render('admin/posts/posts', {
             title: 'Danh sách bài viết',
             posts: results,
             adminName: req.session.admin.username,
@@ -229,11 +219,10 @@ router.get('/posts', (req, res) => {
 });
 
 // 2. Trang form thêm bài viết
-// SỬA LẠI ĐOẠN NÀY
 router.get('/posts/add', (req, res) => {
     db.query("SELECT * FROM categories", (err, categories) => {
         if (err) throw err;
-        res.render('admin/add_post', {
+        res.render('admin/posts/add_post', {
             title: 'Thêm bài viết',
             categories: categories,
             layout: false
@@ -241,12 +230,12 @@ router.get('/posts/add', (req, res) => {
     });
 });
 
-// 3. Xử lý lưu bài viết (POST)
+// 3. Xử lý lưu bài viết (POST - THÊM MỚI)
 router.post('/posts/add', (req, res) => {
     const { title, content, image, category_id, status } = req.body;
     const sql = "INSERT INTO posts (title, content, image, category_id, status) VALUES (?, ?, ?, ?, ?)";
 
-    db.query(sql, [title, content, image, category_id, status || 1], (err) => {
+    db.query(sql, [title, content, image, parseInt(category_id), parseInt(status) || 1], (err) => {
         if (err) {
             console.error(err);
             return res.send("Lỗi lưu database!");
@@ -254,6 +243,60 @@ router.post('/posts/add', (req, res) => {
         res.redirect('/admin/posts');
     });
 });
+
+// 4. Trang hiển thị form chỉnh sửa bài viết (GET EDIT)
+router.get('/posts/edit/:id', (req, res) => {
+    if (!req.session.admin) return res.redirect('/login'); 
+
+    const id = req.params.id;
+    
+    db.query('SELECT * FROM posts WHERE id = ?', [id], (err, results) => {
+        if (err) {
+            console.error("Lỗi lấy bài viết:", err);
+            return res.status(500).send("Lỗi server");
+        }
+
+        if (results.length > 0) {
+            db.query('SELECT * FROM categories', (err, categories) => {
+                if (err) return res.send("Lỗi lấy danh mục");
+
+                res.render('admin/posts/edit_post', { 
+                    post: results[0], 
+                    categories: categories || [],
+                    layout: false 
+                });
+            });
+        } else {
+            res.redirect('/admin/posts');
+        }
+    });
+});
+
+// 5. Xử lý lưu bài viết đã sửa (POST EDIT) - ĐÃ SỬA LỖI XOAY TRANG
+router.post('/posts/edit/:id', (req, res) => {
+    if (!req.session.admin) return res.redirect('/login');
+
+    const id = req.params.id;
+    const { title, image, content, category_id, status } = req.body;
+
+    // Ép kiểu về số để đảm bảo SQL nhận đúng định dạng
+    const cat_id = parseInt(category_id);
+    const stat = parseInt(status) || 0;
+
+    const sql = 'UPDATE posts SET title = ?, image = ?, content = ?, category_id = ?, status = ? WHERE id = ?';
+    
+    db.query(sql, [title, image, content, cat_id, stat, id], (err, result) => {
+        if (err) {
+            console.error("LỖI SQL KHI EDIT:", err);
+            // Hiện lỗi trực tiếp thay vì để trình duyệt xoay vòng
+            return res.status(500).send(`❌ Lỗi cập nhật bài viết: ${err.message}`);
+        }
+        
+        console.log("Cập nhật thành công ID:", id);
+        res.redirect('/admin/posts'); 
+    });
+});
+
 // Xóa bài viết
 router.get('/posts/delete/:id', (req, res) => {
     if (!req.session.admin) return res.redirect('/login');
@@ -270,7 +313,7 @@ router.get('/posts/delete/:id', (req, res) => {
     });
 });
 
-// ---------------- 2. QUẢN LÝ NEWLETTER ----------------
+// ---------------- 3. QUẢN LÝ NEWLETTER & LIÊN HỆ ----------------
 router.get('/subscribers', (req, res) => {
     if (!req.session.admin) return res.redirect('/login');
 
@@ -286,8 +329,7 @@ router.get('/subscribers', (req, res) => {
         });
     });
 });
-//---------------------------------------------------------
-// ---------------- 2. QUẢN LÝ Liên hệ ----------------
+
 router.get('/contacts', (req, res) => {
     if (!req.session.admin) return res.redirect('/login');
 
@@ -328,7 +370,6 @@ router.post('/contact', (req, res) => {
 
 router.get('/contacts/approve/:id', (req, res) => {
     const id = req.params.id;
-
     const sql = "UPDATE contacts SET status = 1 WHERE id = ?";
 
     db.query(sql, [id], (err) => {
@@ -339,7 +380,6 @@ router.get('/contacts/approve/:id', (req, res) => {
 
 router.get('/contacts/unapprove/:id', (req, res) => {
     const id = req.params.id;
-
     const sql = "UPDATE contacts SET status = 0 WHERE id = ?";
 
     db.query(sql, [id], (err) => {
@@ -347,6 +387,5 @@ router.get('/contacts/unapprove/:id', (req, res) => {
         res.redirect('/admin/contacts');
     });
 });
-//---------------------------------------------------------
 
 module.exports = router;
