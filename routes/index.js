@@ -5,26 +5,92 @@ const bcrypt = require('bcrypt');//mã hoá mật khẩu
 // ================= ROUTES =================
 
 // Trang chủ
+// router.get('/', (req, res) => {
+//     const sqlLatest = "SELECT * FROM posts WHERE status = 1 ORDER BY id DESC LIMIT 6";
+//     const sqlTrending = "SELECT * FROM posts WHERE status = 1 ORDER BY views DESC LIMIT 6";
+
+//     db.query(sqlLatest, (err, latestPosts) => {
+//         if (err) {
+//             console.error("Lỗi truy vấn mới nhất:", err);
+//             return res.send("Lỗi cơ sở dữ liệu!");
+//         }
+
+//         db.query(sqlTrending, (err, trendingPosts) => {
+//             if (err) {
+//                 console.error("Lỗi truy vấn trending:", err);
+//                 return res.send("Lỗi cơ sở dữ liệu!");
+//             }
+
+//             return res.render('pages/index', { 
+//                 title: 'Trang chủ - BizNews',
+//                 latestPosts: latestPosts,
+//                 trendingPosts: trendingPosts
+//             });
+//         });
+//     });
+// });
+
+// Trang chủ (Cách viết không dùng async/await)
 router.get('/', (req, res) => {
     const sqlLatest = "SELECT * FROM posts WHERE status = 1 ORDER BY id DESC LIMIT 6";
     const sqlTrending = "SELECT * FROM posts WHERE status = 1 ORDER BY views DESC LIMIT 6";
+    const sqlCategories = "SELECT * FROM categories"; // Lấy danh sách danh mục (nhớ kiểm tra đúng tên bảng trong DB)
 
+    // 1. Lấy tin mới nhất
     db.query(sqlLatest, (err, latestPosts) => {
         if (err) {
             console.error("Lỗi truy vấn mới nhất:", err);
             return res.send("Lỗi cơ sở dữ liệu!");
         }
 
+        // 2. Lấy tin xem nhiều nhất
         db.query(sqlTrending, (err, trendingPosts) => {
             if (err) {
                 console.error("Lỗi truy vấn trending:", err);
                 return res.send("Lỗi cơ sở dữ liệu!");
             }
 
-            return res.render('pages/index', { 
-                title: 'Trang chủ - BizNews',
-                latestPosts: latestPosts,
-                trendingPosts: trendingPosts
+            // 3. Lấy danh sách các danh mục
+            db.query(sqlCategories, (err, categories) => {
+                if (err) {
+                    console.error("Lỗi truy vấn danh mục:", err);
+                    return res.send("Lỗi cơ sở dữ liệu!");
+                }
+
+                // Nếu không có danh mục nào thì render luôn
+                if (categories.length === 0) {
+                    return res.render('pages/index', { 
+                        title: 'Trang chủ - BizNews',
+                        latestPosts: latestPosts,
+                        trendingPosts: trendingPosts,
+                        categories: [] 
+                    });
+                }
+
+                // 4. Lấy bài viết cho từng danh mục
+                let completedRequests = 0; // Biến đếm số lượng truy vấn đã xong
+                
+                categories.forEach(category => {
+                    const sqlPostsByCat = `SELECT * FROM posts WHERE status = 1 AND category_id = ${category.id} ORDER BY id DESC LIMIT 3`;
+                    
+                    db.query(sqlPostsByCat, (err, posts) => {
+                        // Gắn danh sách bài viết vào thuộc tính 'posts' của danh mục hiện tại
+                        category.posts = err ? [] : posts; 
+                        
+                        completedRequests++; // Tăng biến đếm lên 1
+
+                        // Kiểm tra nếu đã truy vấn xong bài viết cho TẤT CẢ danh mục
+                        if (completedRequests === categories.length) {
+                            // Lúc này mới gom tất cả dữ liệu lại và render ra giao diện
+                            return res.render('pages/index', { 
+                                title: 'Trang chủ - BizNews',
+                                latestPosts: latestPosts,
+                                trendingPosts: trendingPosts,
+                                categories: categories // Truyền thêm biến này ra EJS
+                            });
+                        }
+                    });
+                });
             });
         });
     });
